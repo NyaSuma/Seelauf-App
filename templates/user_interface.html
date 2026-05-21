@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Seelauf App - Zeitmesser</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <div class="overlay" id="mainOverlay">
+        <div class="overlay-content">
+            <div class="timer-icon">⏱️</div>
+            <h1>Willkommen bei Seelauf</h1>
+            <p>Starten Sie Ihren Trainingslauf und messen Sie Ihre Zeit mit unserem präzisen Zeitmesser.</p>
+            <div class="button-group">
+                <button class="btn btn-primary" onclick="goToTimer()">Zum Zeitmesser</button>
+                <button class="btn btn-secondary" onclick="closeOverlay()">Abbrechen</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function goToTimer() {
+            // Hier können Sie zur Timer-Seite navigieren
+            console.log("Navigiere zum Zeitmesser...");
+            // window.location.href = '/timer'; // Beispiel-Navigation
+            alert('Weiterleitung zum Zeitmesser...');
+        }
+
+        function closeOverlay() {
+            const overlay = document.getElementById('mainOverlay');
+            overlay.style.opacity = '0';
+            overlay.style.transition = 'opacity 0.3s ease';
+            setTimeout(() => {
+                overlay.style.display = 'none';
+            }, 300);
+        }
+    </script>
+</body>
+</html>
