@@ -4,7 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Seelauf App - Zeitmesser</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style_user.css') }}">
+    <script src="{{ url_for('static', filename='js/script_user.js') }}"></script>
 </head>
 <body>
     <div class="overlay" id="mainOverlay">
@@ -18,23 +19,5 @@
             </div>
         </div>
     </div>
-
-    <script>
-        function goToTimer() {
-            // Hier können Sie zur Timer-Seite navigieren
-            console.log("Navigiere zum Zeitmesser...");
-            // window.location.href = '/timer'; // Beispiel-Navigation
-            alert('Weiterleitung zum Zeitmesser...');
-        }
-
-        function closeOverlay() {
-            const overlay = document.getElementById('mainOverlay');
-            overlay.style.opacity = '0';
-            overlay.style.transition = 'opacity 0.3s ease';
-            setTimeout(() => {
-                overlay.style.display = 'none';
-            }, 300);
-        }
-    </script>
 </body>
 </html>

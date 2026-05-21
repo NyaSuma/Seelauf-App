@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zeitmesser - Seelauf App</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style_zeitmesser.css') }}">
+    <script src="{{ url_for('static', filename='js/script_zeitmesser.js') }}"></script>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>⏱️ Zeitmesser</h1>
+            <p>Messen Sie Ihre Trainingszeit</p>
+        </div>
+
+        <div class="display">
+            <div class="time-display" id="timeDisplay">00:00:00.00</div>
+            <div class="status" id="statusDisplay">Bereit</div>
+        </div>
+
+        <div class="button-group">
+            <button class="btn btn-start" id="startBtn" onclick="startTimer()">Start</button>
+            <button class="btn btn-pause" id="pauseBtn" onclick="pauseTimer()" disabled>Pause</button>
+            <button class="btn btn-reset" id="resetBtn" onclick="resetTimer()">Zurücksetzen</button>
+        </div>
+
+        <div class="button-group">
+            <button class="btn btn-lap" id="lapBtn" onclick="recordLap()" disabled style="width: 100%;">Runde erfassen</button>
+        </div>
+
+        <div class="laps-container">
+            <div class="laps-title">Runden</div>
+            <div id="lapsList" class="empty-laps">Keine Runden erfasst</div>
+        </div>
+    </div>
+</body>
+</html>
