@@ -95,6 +95,21 @@ function updateLapsList() {
     ).join('');
 }
 
+// Spacebar zum Start/Pause
+window.addEventListener('keydown', (event) => {
+    if (event.code === 'Space') {
+        event.preventDefault();
+        const startBtn = document.getElementById('startBtn');
+        const pauseBtn = document.getElementById('pauseBtn');
+
+        if (!startBtn.disabled) {
+            startTimer();
+        } else if (!pauseBtn.disabled) {
+            pauseTimer();
+        }
+    }
+});
+
 // Laden von gespeicherten Daten beim Seitenaufruf
 window.addEventListener('load', () => {
     const elapsedTime = parseInt(localStorage.getItem('elapsedTime')) || 0;
