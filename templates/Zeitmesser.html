@@ -25,13 +25,14 @@
             <button class="btn btn-reset" id="resetBtn" onclick="resetTimer()">Zurücksetzen</button>
         </div>
 
-        <div class="button-group">
-            <button class="btn btn-lap" id="lapBtn" onclick="recordLap()" disabled style="width: 100%;">Runde erfassen</button>
+        <div class="button-group" style="gap: 10px; align-items: center;">
+            <input type="text" id="numberInput" placeholder="Nummer eingeben" style="flex: 1; padding: 10px; font-size: 16px; border: 2px solid #007bff; border-radius: 5px;" disabled>
+            <button class="btn btn-lap" id="lapBtn" onclick="recordMeasurement()" disabled>Speichern</button>
         </div>
 
         <div class="laps-container">
-            <div class="laps-title">Runden</div>
-            <div id="lapsList" class="empty-laps">Keine Runden erfasst</div>
+            <div class="laps-title">Gemessene Zeiten</div>
+            <div id="lapsList" class="empty-laps">Keine Messungen erfasst</div>
         </div>
     </div>
 </body>

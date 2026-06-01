@@ -1,5 +1,6 @@
-from flask import Blueprint, render_template, jsonify
+from flask import Blueprint, render_template, jsonify, request
 from routen.stopwatch import stopwatch
+import db
 
 zeitmesser_bp = Blueprint('zeitmesser', __name__, url_prefix='/zeitmesser')
 api_bp = Blueprint('api', __name__, url_prefix='/api/stopwatch')
@@ -32,6 +33,17 @@ def api_stop():
 def api_lap():
     stopwatch.add_lap()
     return jsonify(stopwatch.get_status())
+
+@api_bp.route('/record', methods=['POST'])
+def api_record():
+    data = request.get_json()
+    number = data.get('number')
+    time_str = data.get('time')
+    
+    if number:
+        db.save_measurement(number, time_str)
+        return jsonify({'success': True, 'time': time_str})
+    return jsonify({'success': False, 'error': 'Nummer erforderlich'}), 400
 
 @api_bp.route('/status', methods=['GET'])
 def api_status():

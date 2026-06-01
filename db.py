@@ -1,52 +1,74 @@
 import sqlite3
+from datetime import datetime
 
-# Erstellt eine beispielhafte Datenbank. Achtung: Daten müssen bearbeitet werden.
+# Datenbank für die Seelauf App
 
 def verbindung_herstellen():
-    return sqlite3.connect("NAME_EURER_DB.db") # Hier den Namen eurer DB angeben
+    return sqlite3.connect("instance/seelauf.db")
 
-# CRUD Operationen:
+# CRUD Operationen für Zeitmessungen:
 
-# CREATE
-def hinzufügen(attribut1, attribut2, attribut3):
+# CREATE - Messung speichern
+def save_measurement(nummer, zeit):
+    """Speichert eine Zeitmessung mit Nummer in der Datenbank"""
     verbindung = verbindung_herstellen()
     cursor = verbindung.cursor()
+    timestamp = datetime.now().isoformat()
     cursor.execute("""
-    INSERT INTO name_der_tabelle (attribut1, attribut2, attribut3)
+    INSERT INTO seelauf_messungen (nummer, zeit, timestamp)
     VALUES (?, ?, ?)
-    """, (attribut1, attribut2, attribut3))
+    """, (nummer, zeit, timestamp))
     verbindung.commit()
     verbindung.close()
 
-# READ
-def abfragen():
+# READ - Alle Messungen abrufen
+def get_measurements():
+    """Ruft alle gespeicherten Zeitmessungen ab"""
     verbindung = verbindung_herstellen()
     cursor = verbindung.cursor()
-    cursor.execute("SELECT * FROM name_der_tabelle")
-    alle_daten = cursor.fetchall()
+    cursor.execute("SELECT * FROM seelauf_messungen ORDER BY id DESC")
+    alle_messungen = cursor.fetchall()
     verbindung.close()
-    return alle_daten
+    return alle_messungen
+
+# READ - Messung nach Nummer
+def get_measurement_by_number(nummer):
+    """Ruft Messungen für eine bestimmte Nummer ab"""
+    verbindung = verbindung_herstellen()
+    cursor = verbindung.cursor()
+    cursor.execute("SELECT * FROM seelauf_messungen WHERE nummer = ? ORDER BY id DESC", (nummer,))
+    messungen = cursor.fetchall()
+    verbindung.close()
+    return messungen
 
 # UPDATE
-def update_attribut1(id, attribut1):
+def update_measurement(id, nummer, zeit):
+    """Aktualisiert eine Zeitmessung"""
     verbindung = verbindung_herstellen()
     cursor = verbindung.cursor()
     cursor.execute("""
-    UPDATE name_der_tabelle
-    SET attribut1 = ?
+    UPDATE seelauf_messungen
+    SET nummer = ?, zeit = ?
     WHERE id = ?
-    """, (attribut1, id))
+    """, (nummer, zeit, id))
     verbindung.commit()
     verbindung.close()
 
 # DELETE
-def delete(id):
+def delete_measurement(id):
+    """Löscht eine Zeitmessung"""
     verbindung = verbindung_herstellen()
     cursor = verbindung.cursor()
-    cursor.execute("""
-    DELETE FROM name_der_tabelle
-    WHERE id = ?
-    """, (id,))
+    cursor.execute("DELETE FROM seelauf_messungen WHERE id = ?", (id,))
+    verbindung.commit()
+    verbindung.close()
+
+# DELETE ALL
+def clear_measurements():
+    """Löscht alle Zeitmessungen"""
+    verbindung = verbindung_herstellen()
+    cursor = verbindung.cursor()
+    cursor.execute("DELETE FROM seelauf_messungen")
     verbindung.commit()
     verbindung.close()
 
@@ -55,13 +77,13 @@ def delete(id):
 verbindung = verbindung_herstellen()
 cursor = verbindung.cursor()
 cursor.execute("""
-CREATE TABLE IF NOT EXISTS name_der_tabelle (
+CREATE TABLE IF NOT EXISTS seelauf_messungen (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    attribut1 TEXT,
-    attribut2 INTEGER, 
-    attribut3 TEXT          
-               )
-               """)
+    nummer TEXT NOT NULL,
+    zeit TEXT NOT NULL,
+    timestamp TEXT NOT NULL
+)
+""")
 
-verbindung.commit() # speichert Änderungen
-verbindung.close() # schließt die Verbindung
+verbindung.commit()
+verbindung.close()
