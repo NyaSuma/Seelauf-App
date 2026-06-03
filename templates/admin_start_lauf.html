@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}Lauf starten - Seelauf App{% endblock %}
+{% block content %}
+<div class="container py-4">
+    <h1 class="mb-4">Lauf starten</h1>
+    <form method="POST">
+        <div class="mb-3">
+            <label for="class_group" class="form-label">Klasse/Gruppe:</label>
+            <select class="form-select" id="class_group" name="class_group" required>
+                <option value="">-- Bitte auswählen --</option>
+                {% for group in class_groups %}
+                <option value="{{ group }}">{{ group }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <button type="submit" class="btn btn-admin">Lauf starten</button>
+        <a href="{{ url_for('admin.list_laeufe') }}" class="btn btn-outline-secondary">Abbrechen</a>
+    </form>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{category}} mt-3">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+</div>
+{% endblock %}
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/admin_start_lauf.js') }}"></script>
+{% endblock %}

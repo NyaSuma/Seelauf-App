@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}Admin Login - Seelauf App{% endblock %}
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-4 col-lg-3">
+            <div class="overlay-content text-center">
+                <div class="timer-icon">🔐</div>
+                <h1>Admin Zugang</h1>
+                <form method="POST">
+                    <div class="mb-3">
+                        <label for="code" class="form-label">Zugangscode:</label>
+                        <input type="password" class="form-control" id="code" name="code" required>
+                    </div>
+                    <button type="submit" class="btn btn-admin w-100">Anmelden</button>
+                </form>
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        {% for category, message in messages %}
+                            <div class="alert alert-{{category}} mt-3">{{ message }}</div>
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/admin_login.js') }}"></script>
+{% endblock %}

@@ -1,18 +1,12 @@
-<!DOCTYPE html>
-<html lang="de">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bordesholmer Seelauf</title>
-</head>
-<body>
-    <h1>HBS Seelauf</h1>
-        <h2>Willkommen auf der HBS Seelauf-App! </h2>
-    <h1>HBS Seelauf</h1>
-
-</body>
-<!-- Verknüpfung zu weiteren Seiten -->
-    <a href="/formular_post">Formular Post</a>
-    <a href="/formular_get">Formular Get</a>
-    <a href="/user_interface">User Interface</a>
-</html> 
+{% extends "base.html" %}
+{% block title %}Bordesholmer Seelauf{% endblock %}
+{% block content %}
+<div class="container text-center py-5">
+    <h1 class="display-4">Bordesholmer Seelauf</h1>
+    <p class="lead">Willkommen zur Seelauf-App der Hans‑Brüggemann‑Schule.</p>
+    <div class="d-grid gap-3 col-6 mx-auto mt-4">
+        <a href="{{ url_for('admin.login') }}" class="btn btn-admin btn-lg">Admin Panel</a>
+        <a href="{{ url_for('main.user_interface') }}" class="btn btn-user btn-lg">Zeitnehmer‑Interface</a>
+    </div>
+</div>
+{% endblock %}

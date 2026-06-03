@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block title %}Datenbank - Seelauf App{% endblock %}
+{% block content %}
+<div class="container py-4">
+    <h1 class="mb-4">Datenbank Übersicht</h1>
+    <p class="lead">Hier können Sie die Datenbank der Seelauf-App verwalten und einsehen.</p>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{category}}">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card mb-4 shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">Datenbank Informationen</h5>
+                    <p class="card-text">
+                        Dies ist ein Platzhalter für Datenbankverwaltungsfunktionen.
+                        In einer vollständigen Implementierung könnten hier Tools zur
+                        Sicherung, Wiederherstellung und Analyse der Datenbank stehen.
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card mb-4 shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">Systemstatus</h5>
+                    <div class="d-grid gap-2">
+                        <button class="btn btn-outline-primary" disabled>Datenbank sichern</button>
+                        <button class="btn btn-outline-success" disabled>Datenbank wiederherstellen</button>
+                        <button class="btn btn-outline-danger" disabled>Datenbank bereinigen</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card mb-4 shadow-sm">
+        <div class="card-body">
+            <h5 class="card-title">Hinweis</h5>
+            <p class="text-muted">
+                Diese Seite befindet sich derzeit in der Entwicklung.
+                Für die tägliche Nutzung verwenden Sie bitte das Admin-Panel über den Hauptmenüpunkt.
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/datenbank.js') }}"></script>
+{% endblock %}
