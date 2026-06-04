@@ -13,11 +13,13 @@ function startTimer() {
     const startBtn = document.getElementById('startBtn');
     const pauseBtn = document.getElementById('pauseBtn');
     const lapBtn = document.getElementById('lapBtn');
+    const numberInput = document.getElementById('numberInput');
     const statusDisplay = document.getElementById('statusDisplay');
     
     startBtn.disabled = true;
     pauseBtn.disabled = false;
     lapBtn.disabled = false;
+    numberInput.disabled = false;
     statusDisplay.textContent = 'Läuft...';
 
     const startTime = Date.now() - (parseInt(localStorage.getItem('elapsedTime')) || 0);
@@ -48,11 +50,12 @@ function resetTimer() {
     if (timerInterval) clearInterval(timerInterval);
     
     localStorage.removeItem('elapsedTime');
-    localStorage.removeItem('laps');
+    localStorage.removeItem('measurements');
     
     const startBtn = document.getElementById('startBtn');
     const pauseBtn = document.getElementById('pauseBtn');
     const lapBtn = document.getElementById('lapBtn');
+    const numberInput = document.getElementById('numberInput');
     const statusDisplay = document.getElementById('statusDisplay');
     
     document.getElementById('timeDisplay').textContent = '00:00:00.00';
@@ -61,36 +64,79 @@ function resetTimer() {
     startBtn.disabled = false;
     pauseBtn.disabled = true;
     lapBtn.disabled = true;
+    numberInput.disabled = true;
+    numberInput.value = '';
     
-    document.getElementById('lapsList').innerHTML = '<div class="empty-laps">Keine Runden erfasst</div>';
+    document.getElementById('lapsList').innerHTML = '<div class="empty-laps">Keine Messungen erfasst</div>';
 }
 
-function recordLap() {
+async function recordMeasurement() {
+    const numberInput = document.getElementById('numberInput');
+    const number = numberInput.value.trim();
     const timeDisplay = document.getElementById('timeDisplay').textContent;
-    const laps = JSON.parse(localStorage.getItem('laps')) || [];
     
-    laps.push({
-        number: laps.length + 1,
-        time: timeDisplay
-    });
-    
-    localStorage.setItem('laps', JSON.stringify(laps));
-    updateLapsList();
-}
-
-function updateLapsList() {
-    const laps = JSON.parse(localStorage.getItem('laps')) || [];
-    const lapsList = document.getElementById('lapsList');
-    
-    if (laps.length === 0) {
-        lapsList.innerHTML = '<div class="empty-laps">Keine Runden erfasst</div>';
+    if (!number) {
+        alert('Bitte geben Sie eine Nummer ein!');
         return;
     }
     
-    lapsList.innerHTML = laps.map(lap => 
+    try {
+        // Sende die Messung an den Backend
+        const response = await fetch('/api/stopwatch/record', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                number: number,
+                time: timeDisplay
+            })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            // Speichere lokal
+            const measurements = JSON.parse(localStorage.getItem('measurements')) || [];
+            measurements.push({
+                number: number,
+                time: timeDisplay
+            });
+            localStorage.setItem('measurements', JSON.stringify(measurements));
+            updateLapsList();
+            numberInput.value = '';
+            numberInput.focus();
+        } else {
+            alert('Fehler beim Speichern: ' + (data.error || 'Unbekannter Fehler'));
+        }
+    } catch (error) {
+        console.error('Fehler:', error);
+        // Fallback: Speichere lokal wenn Backend nicht erreichbar
+        const measurements = JSON.parse(localStorage.getItem('measurements')) || [];
+        measurements.push({
+            number: number,
+            time: timeDisplay
+        });
+        localStorage.setItem('measurements', JSON.stringify(measurements));
+        updateLapsList();
+        numberInput.value = '';
+        numberInput.focus();
+    }
+}
+
+function updateLapsList() {
+    const measurements = JSON.parse(localStorage.getItem('measurements')) || [];
+    const lapsList = document.getElementById('lapsList');
+    
+    if (measurements.length === 0) {
+        lapsList.innerHTML = '<div class="empty-laps">Keine Messungen erfasst</div>';
+        return;
+    }
+    
+    lapsList.innerHTML = measurements.map((m, index) => 
         `<div class="lap-item">
-            <span class="lap-number">Runde ${lap.number}</span>
-            <span class="lap-time">${lap.time}</span>
+            <span class="lap-number">Nummer ${m.number}</span>
+            <span class="lap-time">${m.time}</span>
         </div>`
     ).join('');
 }
@@ -106,6 +152,15 @@ window.addEventListener('keydown', (event) => {
             startTimer();
         } else if (!pauseBtn.disabled) {
             pauseTimer();
+        }
+    }
+    
+    // Enter-Taste zum Speichern (wenn Input fokussiert ist)
+    if (event.code === 'Enter') {
+        const numberInput = document.getElementById('numberInput');
+        if (document.activeElement === numberInput && !numberInput.disabled) {
+            event.preventDefault();
+            recordMeasurement();
         }
     }
 });

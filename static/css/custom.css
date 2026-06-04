@@ -1,0 +1,57 @@
+/* Custom styles for Seelauf App */
+body {
+    padding-top: 4rem;
+}
+.footer {
+    margin-top: auto;
+    padding: 2rem 0;
+    border-top: 1px solid #dee2e6;
+    text-align: center;
+    font-size: 0.9rem;
+    color: #6c757d;
+}
+.container {
+    max-width: 960px;
+}
+.btn-admin {
+    background-color: #0d6efd;
+    border-color: #0d6efd;
+}
+.btn-admin:hover {
+    background-color: #0b5ed7;
+    border-color: #0a58ca;
+}
+.btn-user {
+    background-color: #198754;
+    border-color: #198754;
+}
+.btn-user:hover {
+    background-color: #157347;
+    border-color: #146c43;
+}
+/* Overlay styling for login etc */
+.overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1050;
+}
+.overlay-content {
+    background: white;
+    padding: 2rem;
+    border-radius: .5rem;
+    width: 100%;
+    max-width: 400px;
+}
+.overlay-content h1 {
+    margin-top: 0;
+}
+.timer-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    display: block;
+    text-align: center;
+}
