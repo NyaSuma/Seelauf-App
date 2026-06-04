@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}Schüler bearbeiten - Seelauf App{% endblock %}
+{% block content %}
+<div class="container py-4">
+    <h1 class="mb-4">Schüler bearbeiten</h1>
+    <form method="POST">
+        <div class="mb-3">
+            <label for="name" class="form-label">Name:</label>
+            <input type="text" class="form-control" id="name" name="name" value="{{ student.name }}" required>
+        </div>
+        <div class="mb-3">
+            <label for="class_group" class="form-label">Klasse/Gruppe:</label>
+            <input type="text" class="form-control" id="class_group" name="class_group" value="{{ student.class_group }}" required>
+        </div>
+        <div class="mb-3">
+            <label for="nummer" class="form-label">Nummer:</label>
+            <input type="text" class="form-control" id="nummer" name="nummer" value="{{ student.nummer }}" required>
+        </div>
+        <div class="mb-3 form-check">
+            <input type="checkbox" class="form-check-input" name="ill" id="ill" {% if student.ill %}checked{% endif %}>
+            <label class="form-check-label" for="ill">Schüler ist krank (nicht laufen)</label>
+        </div>
+        <button type="submit" class="btn btn-admin">Änderungen speichern</button>
+        <a href="{{ url_for('admin.list_students') }}" class="btn btn-outline-secondary">Abbrechen</a>
+    </form>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{category}} mt-3">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+</div>
+{% endblock %}
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/admin_edit_student.js') }}"></script>
+{% endblock %}

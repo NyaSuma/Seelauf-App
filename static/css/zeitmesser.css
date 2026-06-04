@@ -189,6 +189,26 @@ body {
     font-size: 14px;
 }
 
+#numberInput {
+    border: 2px solid #007bff !important;
+    border-radius: 5px !important;
+    padding: 10px !important;
+    font-size: 16px !important;
+    transition: all 0.3s ease;
+}
+
+#numberInput:focus {
+    outline: none;
+    border-color: #0056b3 !important;
+    box-shadow: 0 0 0 3px rgba(0, 86, 179, 0.1);
+}
+
+#numberInput:disabled {
+    background-color: #f0f0f0;
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
 @media (max-width: 600px) {
     .container {
         padding: 20px;
@@ -205,5 +225,10 @@ body {
     .btn {
         padding: 10px 16px;
         font-size: 14px;
+    }
+    
+    #numberInput {
+        font-size: 14px !important;
+        padding: 8px !important;
     }
 }

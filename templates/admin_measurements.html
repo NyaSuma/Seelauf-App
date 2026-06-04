@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block title %}Messungen - Seelauf App{% endblock %}
+{% block content %}
+<div class="container py-4">
+    <h1 class="mb-4">Messungen</h1>
+    <form action="{{ url_for('admin.clear_measurements') }}" method="POST" class="mb-3">
+        <button type="submit" class="btn btn-danger" onclick="return confirm('Wirklich alle Messungen löschen? Diese Aktion kann nicht rückgängig gemacht werden.');">Alle Messungen löschen</button>
+    </form>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{category}}">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+    <div class="table-responsive">
+        <table class="table table-striped table-hover">
+            <thead class="table-dark">
+                <tr>
+                    <th>#</th>
+                    <th>Name</th>
+                    <th>Klasse/Gruppe</th>
+                    <th>Nummer</th>
+                    <th>Zeit</th>
+                    <th>Lauf</th>
+                    <th>Timestamp</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for m in measurements %}
+                <tr>
+                    <td>{{ m.id }}</td>
+                    <td>{{ m.name }}</td>
+                    <td>{{ m.class_group }}</td>
+                    <td>{{ m.nummer }}</td>
+                    <td>{{ m.zeit }}</td>
+                    <td>
+                        {% if m.lauf_class %}
+                        {{ m.lauf_class }} ({{ m.lauf_start }})
+                        {% else %}
+                        —
+                        {% endif %}
+                    </td>
+                    <td>{{ m.timestamp }}</td>
+                </tr>
+                {% endfor %}
+                {% if not measurements %}
+                <tr><td colspan="7" class="text-center">Keine Messungen vorhanden.</td></tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/admin_measurements.js') }}"></script>
+{% endblock %}

@@ -1,23 +1,27 @@
-<!DOCTYPE html>
-<html lang="de">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Seelauf App - Zeitmesser</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style_user.css') }}">
-    <script src="{{ url_for('static', filename='js/script_user.js') }}"></script>
-</head>
-<body>
-    <div class="overlay" id="mainOverlay">
-        <div class="overlay-content">
-            <div class="timer-icon">⏱️</div>
-            <h1>Willkommen bei Seelauf</h1>
-            <p>Starten Sie Ihren Trainingslauf und messen Sie Ihre Zeit mit unserem präzisen Zeitmesser.</p>
-            <div class="button-group">
-                <button class="btn btn-primary" onclick="goToTimer()">Zum Zeitmesser</button>
-                <button class="btn btn-secondary" onclick="closeOverlay()">Abbrechen</button>
+{% extends "base.html" %}
+{% block title %}Willkommen - Seelauf App{% endblock %}
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-4 col-lg-3">
+            <div class="overlay-content text-center">
+                <div class="timer-icon">⏱️</div>
+                <h1>Willkommen bei Seelauf</h1>
+                <p>Starten Sie Ihren Trainingslauf und messen Sie Ihre Zeit mit unserem präzisen Zeitmesser.</p>
+                <div class="d-grid gap-2">
+                    <a href="{{ url_for('zeitmesser.zeitmesser') }}" class="btn btn-user btn-lg">Zum Zeitmesser</a>
+                    <button class="btn btn-outline-secondary" onclick="closeOverlay()">Abbrechen</button>
+                </div>
             </div>
         </div>
     </div>
-</body>
-</html>
+</div>
+{% endblock %}
+{% block extra_js %}
+<script>
+    function closeOverlay() {
+        const overlay = document.querySelector('.overlay');
+        if (overlay) overlay.style.display = 'none';
+    }
+</script>
+{% endblock %}
