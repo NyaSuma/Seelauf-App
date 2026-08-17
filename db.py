@@ -1,4 +1,4 @@
-import sqlite3
+﻿import sqlite3
 from datetime import datetime
 import os
 from contextlib import contextmanager
@@ -247,6 +247,7 @@ def end_lauf(lauf_id):
         raise
 
 # ---- MEASUREMENTS ----
+<<<<<<< HEAD
 def _resolve_student_identifier(cursor, student_identifier):
     """Resolves either a student id or a student number to the student's ID."""
     if isinstance(student_identifier, int):
@@ -278,12 +279,51 @@ def save_measurement(student_identifier, zeit, lauf_id=None):
             if student_id is None:
                 raise ValueError('Ungültige Schüler-ID oder Nummer')
             if lauf_id is None:
+=======
+def save_measurement(student_identifier, zeit, lauf_id=None):
+    """Speichert eine Zeitmessung für einen Schüler.
+    `student_identifier` kann entweder eine `id` (int) oder eine `nummer` (str) sein.
+    Wenn kein Schüler mit der gegebenen Nummer existiert, wird ein Platzhalter-Schüler angelegt.
+    Wenn `lauf_id` nicht übergeben wird, wird der aktive Lauf für die Klasse des Schülers gesucht."""
+    try:
+        with get_db_connection() as conn:
+            cursor = conn.cursor()
+            # Determine student_id: try by id first, then by nummer, otherwise create student placeholder
+            student_id = None
+            # Try treating identifier as an id
+            try:
+                possible_id = int(student_identifier)
+            except Exception:
+                possible_id = None
+
+            if possible_id is not None:
+                cursor.execute("SELECT * FROM students WHERE id = ?", (possible_id,))
+                row = cursor.fetchone()
+                if row:
+                    student_id = row['id']
+
+            if student_id is None:
+                # Try by nummer
+                cursor.execute("SELECT * FROM students WHERE nummer = ?", (str(student_identifier),))
+                row = cursor.fetchone()
+                if row:
+                    student_id = row['id']
+                else:
+                    # Create placeholder student with given nummer
+                    cursor.execute("INSERT INTO students (name, class_group, nummer, ill) VALUES (?, ?, ?, ?)",
+                                   ('', None, str(student_identifier), 0))
+                    student_id = cursor.lastrowid
+
+            if lauf_id is None:
+                # Get student's class group to find active lauf
+>>>>>>> d521d1dac7dd2aa14cbd6acd36c952967cd5bca3
                 cursor.execute("SELECT class_group FROM students WHERE id = ?", (student_id,))
                 row = cursor.fetchone()
                 if row:
                     class_group = row['class_group']
-                    lauf = get_active_lauf(class_group)
+                    lauf = get_active_lauf(class_group) if class_group else None
                     lauf_id = lauf['id'] if lauf else None
+
             timestamp = datetime.now().isoformat()
             cursor.execute("""
             INSERT INTO measurements (student_id, lauf_id, zeit, timestamp)
@@ -372,4 +412,27 @@ def clear_measurements():
             conn.commit()
     except sqlite3.Error as e:
         print(f"Error clearing measurements: {e}")
+        raise
+
+def get_measurement_by_number(nummer):
+    """Ruft alle Messungen für die gegebene Schülernummer ab (neueste zuerst)."""
+    try:
+        with get_db_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("SELECT id FROM students WHERE nummer = ?", (str(nummer),))
+            row = cursor.fetchone()
+            if not row:
+                return []
+            student_id = row['id']
+            # Reuse get_measurements_by_student logic
+            cursor.execute("""
+            SELECT m.id, m.zeit, m.timestamp
+            FROM measurements m
+            WHERE m.student_id = ?
+            ORDER BY m.id DESC
+            """, (student_id,))
+            rows = cursor.fetchall()
+            return [dict(r) for r in rows]
+    except sqlite3.Error as e:
+        print(f"Error retrieving measurements by nummer: {e}")
         raise
