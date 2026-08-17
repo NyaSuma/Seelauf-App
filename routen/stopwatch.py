@@ -11,29 +11,32 @@ class Stopwatch:
         self.laps = []
 
     def start(self):
-        """Startet den Zeitmesser"""
-        if not self.is_running:
-            self.start_time = time.time() - self.total_pause_duration
+        """Startet den Zeitmesser neu."""
+        if not self.is_running and not self.is_paused:
+            self.start_time = time.time()
+            self.pause_time = None
+            self.total_pause_duration = 0
             self.is_running = True
             self.is_paused = False
+            self.laps = []
 
     def pause(self):
-        """Pausiert den Zeitmesser"""
+        """Pausiert den Zeitmesser."""
         if self.is_running and not self.is_paused:
             self.pause_time = time.time()
             self.is_running = False
             self.is_paused = True
 
     def resume(self):
-        """Setzt den Zeitmesser fort"""
+        """Setzt den Zeitmesser fort."""
         if self.is_paused and self.pause_time:
-            pause_duration = time.time() - self.pause_time
-            self.total_pause_duration += pause_duration
+            self.total_pause_duration += time.time() - self.pause_time
+            self.pause_time = None
             self.is_running = True
             self.is_paused = False
 
     def stop(self):
-        """Stoppt den Zeitmesser und setzt es zurück"""
+        """Stoppt den Zeitmesser und setzt ihn zurück."""
         self.is_running = False
         self.is_paused = False
         self.start_time = None
@@ -42,14 +45,15 @@ class Stopwatch:
         self.laps = []
 
     def get_elapsed_time(self):
-        """Gibt die verstrichene Zeit in Sekunden zurück"""
+        """Gibt die verstrichene Zeit in Sekunden zurück."""
         if self.start_time is None:
             return 0
-        
+
         if self.is_running:
-            return time.time() - self.start_time
-        else:
-            return self.pause_time - self.start_time if self.pause_time else 0
+            return time.time() - self.start_time - self.total_pause_duration
+        if self.is_paused and self.pause_time:
+            return self.pause_time - self.start_time - self.total_pause_duration
+        return 0
 
     def add_lap(self):
         """Fügt eine Runde hinzu"""

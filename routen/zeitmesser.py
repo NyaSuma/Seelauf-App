@@ -11,7 +11,7 @@ TIME_FORMAT_REGEX = re.compile(r'^\d{2}:\d{2}:\d{2}\.\d{2}$')
 
 @zeitmesser_bp.route('/')
 def zeitmesser():
-    return render_template('Zeitmesser.html')
+    return render_template('zeitmesser.html')
 
 @api_bp.route('/start', methods=['POST'])
 def api_start():
@@ -70,3 +70,19 @@ def api_record():
 @api_bp.route('/status', methods=['GET'])
 def api_status():
     return jsonify(stopwatch.get_status())
+
+
+@api_bp.route('/history', methods=['GET'])
+def api_history():
+    try:
+        return jsonify(db.get_recent_measurements(limit=20))
+    except Exception as e:
+        return jsonify({'success': False, 'error': f'Datenbankfehler: {str(e)}'}), 500
+
+
+@api_bp.route('/active_runs', methods=['GET'])
+def api_active_runs():
+    try:
+        return jsonify(db.get_active_runs())
+    except Exception as e:
+        return jsonify({'success': False, 'error': f'Datenbankfehler: {str(e)}'}), 500

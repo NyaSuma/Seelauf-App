@@ -4,12 +4,14 @@ Eine Flask-basierte Anwendung zur Zeitmessung bei Laufveranstaltungen.
 
 ## Features
 
-- Start/Stop/Pausen eines Stoppuhrs
-- Runde Zeiten (Lap) erfassen
-- Zeiten mit Startnummer speichern
+- Start/Stop/Pausen eines serverseitigen Stoppuhrs
+- Runde Zeiten (Lap) erfassen und direkt speichern
+- Zeiten nach Startnummer speichern
 - Aufzeichnung aller Messungen in SQLite-Datenbank
-- RESTful API zur Erfassung der Zeiten
-- Einfache Web-Oberfläche
+- Stabiler Adminbereich zur Verwaltung von Schülern, Läufen und Messungen
+- RESTful API zur Steuerung und Auswertung der Zeitnahme
+- Aktive Läufe und Ergebnisübersicht direkt im Zeitnehmer-Interface
+- Moderne, responsive Oberfläche und bessere Fehlerbehandlung
 
 ## Installation
 
@@ -36,13 +38,11 @@ Eine Flask-basierte Anwendung zur Zeitmessung bei Laufveranstaltungen.
    ```bash
    pip install -r requirements.txt
    ```
-
 4. Umgebungskopie erstellen
    ```bash
-   cp .env.example .env
+   copy .env.example .env
    ```
-   Passe die Werte in `.env` nach Bedarf an.
-
+   Passe die Werte in `.env` nach Bedarf an, insbesondere `SECRET_KEY` und `ADMIN_CODE`.
 5. Datenbank initialisieren (wird beim ersten Start automatisch erstellt)
 
 6. Anwendung starten
@@ -59,8 +59,10 @@ Eine Flask-basierte Anwendung zur Zeitmessung bei Laufveranstaltungen.
 - `POST /api/stopwatch/stop` - Stoppuhr stoppen und zurücksetzen
 - `POST /api/stopwatch/lap` - Runde hinzufügen
 - `POST /api/stopwatch/record` - Zeit mit Nummer aufnehmen
-  - Body: `{ "number": "123", "time": "00:05:32.10" }`
+  - Body: `{ "number": "123" }`
 - `GET /api/stopwatch/status` - Aktuellen Stoppuhrstatus abrufen
+- `GET /api/stopwatch/history` - Letzte Messungen abrufen
+- `GET /api/stopwatch/active_runs` - Aktive Läufe abrufen
 
 ## Projektstruktur
 

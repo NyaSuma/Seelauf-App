@@ -4,32 +4,64 @@
 <link rel="stylesheet" href="{{ url_for('static', filename='css/zeitmesser.css') }}">
 {% endblock %}
 {% block content %}
-<div class="container">
-    <div class="row justify-content-center">
-        <div class="col-md-5">
-            <div class="text-center mb-4">
-                <h1>⏱️ Zeitmesser</h1>
-                <p class="text-muted">Messen Sie Ihre Trainingszeit</p>
-            </div>
-            <div class="card shadow-sm">
+<div class="container py-4">
+    <div class="row gy-4">
+        <div class="col-lg-7">
+            <div class="card shadow-sm border-0">
                 <div class="card-body">
-                    <div class="display-4 text-monospace" id="timeDisplay">00:00:00.00</div>
-                    <div id="statusDisplay" class="mb-3 text-center fw-medium">Bereit</div>
-                    <div class="d-grid gap-2">
-                        <button class="btn btn btn-success" id="startBtn" onclick="startTimer()">Start</button>
-                        <button class="btn btn btn-warning" id="pauseBtn" onclick="pauseTimer()" disabled>Pause</button>
-                        <button class="btn btn btn-danger" id="resetBtn" onclick="resetTimer()">Zurücksetzen</button>
+                    <div class="text-center mb-4">
+                        <h1 class="display-6">⏱️ Zeitmesser</h1>
+                        <p class="text-muted">Schnell, sicher und zuverlässig Zeit nehmen.</p>
                     </div>
-                    <div class="mt-4">
+                    <div class="display text-center mb-4">
+                        <div class="time-display" id="timeDisplay">00:00:00.00</div>
+                        <div class="status" id="statusDisplay">Bereit</div>
+                    </div>
+
+                    <div class="button-group mb-4">
+                        <button class="btn btn-start" id="startBtn" onclick="startTimer()">Start</button>
+                        <button class="btn btn-pause" id="pauseBtn" onclick="pauseTimer()" disabled>Pause</button>
+                        <button class="btn btn-reset" id="resetBtn" onclick="resetTimer()">Zurücksetzen</button>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="numberInput" class="form-label">Startnummer</label>
                         <div class="input-group">
                             <input type="text" class="form-control" id="numberInput" placeholder="Nummer eingeben" aria-label="Nummer" disabled>
-                            <button class="btn btn-primary" id="lapBtn" onclick="recordMeasurement()" disabled>Speichern</button>
+                            <button class="btn btn-lap" id="lapBtn" onclick="recordMeasurement()" disabled>Speichern</button>
                         </div>
                     </div>
-                    <hr class="my-4">
-                    <h5>Gemessene Zeiten</h5>
-                    <div id="lapsList" class="mt-2">
-                        <div class="text-muted">Keine Messungen erfasst</div>
+
+                    <div class="mb-4">
+                        <small class="text-muted">Tipp: Leertaste zum Starten/Fortsetzen, Enter zum Speichern.</small>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card shadow-sm border-0 mt-4">
+                <div class="card-body">
+                    <h5 class="laps-title">Letzte Messungen</h5>
+                    <div id="lapsList" class="laps-container">
+                        <div class="empty-laps">Keine Messungen erfasst</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-5">
+            <div class="card shadow-sm border-0">
+                <div class="card-body">
+                    <h5 class="laps-title">Aktive Läufe</h5>
+                    <div id="activeRuns" class="laps-container">
+                        <div class="empty-laps">Keine aktiven Läufe gefunden.</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card shadow-sm border-0 mt-4">
+                <div class="card-body">
+                    <h5 class="laps-title">Kürzliche Ergebnisse</h5>
+                    <div id="historyList" class="laps-container">
+                        <div class="empty-laps">Lade Ergebnisse…</div>
                     </div>
                 </div>
             </div>

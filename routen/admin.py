@@ -1,6 +1,7 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, session, jsonify
 import db
 import os
+import hmac
 
 admin_bp = Blueprint('admin', __name__, url_prefix='/admin')
 
@@ -19,8 +20,8 @@ def login_required(f):
 @admin_bp.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
-        code = request.form.get('code')
-        if code == ADMIN_CODE:
+        code = request.form.get('code', '')
+        if hmac.compare_digest(code, ADMIN_CODE):
             session['admin_logged_in'] = True
             flash('Erfolgreich angemeldet.', 'success')
             return redirect(url_for('admin.dashboard'))
