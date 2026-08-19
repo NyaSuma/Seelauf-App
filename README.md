@@ -22,7 +22,7 @@ Ein Flask-basiertes Anwendung zur Verwaltung von Schülerlaufzeiten mit Admin-Da
 ```bash
 cd f:\Informatik\Seelauf-App
 ```
-
+ssss
 2. **Virtual Environment erstellen:**
 ```bash
 python -m venv .venv
