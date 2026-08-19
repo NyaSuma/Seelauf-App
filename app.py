@@ -1,22 +1,33 @@
+"""
+Haupt-Anwendung für Seelauf-App (Zeitmessungsverwaltung)
+"""
 import os
 from pathlib import Path
 from flask import Flask
 from dotenv import load_dotenv
 
-# Load environment variables
+# Umgebungsvariablen laden
 load_dotenv()
 
-# Import blueprints
+# Blueprints (Module) importieren
 from routen.main import main_bp
 from routen.zeitmesser import zeitmesser_bp, api_bp
 from routen.admin import admin_bp
 
 
 def create_app(test_config=None):
-    """Create and configure Flask application."""
+    """
+    Flask-Anwendung erstellen und konfigurieren.
+    
+    Args:
+        test_config: Optionale Test-Konfiguration
+    
+    Returns:
+        Konfigurierte Flask-App
+    """
     app = Flask(__name__, instance_relative_config=True)
     
-    # Configuration
+    # Anwendungs-Konfiguration laden
     app.config.update(
         DEBUG=os.getenv('FLASK_DEBUG', 'False').lower() == 'true',
         HOST=os.getenv('FLASK_HOST', '0.0.0.0'),
@@ -26,16 +37,16 @@ def create_app(test_config=None):
         SESSION_COOKIE_SAMESITE='Lax'
     )
     
-    # Override with test config if provided
+    # Test-Konfiguration überschreiben (falls vorhanden)
     if test_config:
         app.config.update(test_config)
         if 'DATABASE_PATH' in test_config:
             os.environ['DATABASE_PATH'] = test_config['DATABASE_PATH']
     
-    # Ensure instance path exists
+    # Instanz-Verzeichnis erstellen
     Path(app.instance_path).mkdir(exist_ok=True)
     
-    # Register blueprints
+    # Route-Module registrieren
     app.register_blueprint(main_bp)
     app.register_blueprint(zeitmesser_bp)
     app.register_blueprint(api_bp)
@@ -44,11 +55,12 @@ def create_app(test_config=None):
     return app
 
 
-# Create app instance
+# App-Instanz erstellen
 app = create_app()
 
 
 if __name__ == '__main__':
+    # Anwendung starten
     app.run(
         host=app.config['HOST'],
         port=app.config['PORT'],

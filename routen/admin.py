@@ -1,3 +1,7 @@
+"""
+Admin-Dashboard-Modul für Seelauf-App
+Verwaltung von Schülern, Läufen und Zeitmessungen mit Authentifizierung
+"""
 from functools import wraps
 import os
 import hmac
@@ -11,7 +15,10 @@ ADMIN_CODE = os.getenv('ADMIN_CODE', 'admin123')
 
 
 def login_required(f):
-    """Decorator to require admin login."""
+    """
+    Decorator: Erzwingt Admin-Login.
+    Umleitet auf Login-Seite, wenn Benutzer nicht authentifiziert ist.
+    """
     @wraps(f)
     def decorated_function(*args, **kwargs):
         if not session.get('admin_logged_in'):
@@ -21,11 +28,19 @@ def login_required(f):
     return decorated_function
 
 
+# ============================================================================
+# AUTHENTIFIZIERUNG
+# ============================================================================
+
 @admin_bp.route('/login', methods=['GET', 'POST'])
 def login():
-    """Admin login."""
+    """
+    Admin-Login-Seite.
+    Prüft den Zugangscode mit HMAC-Vergleich.
+    """
     if request.method == 'POST':
         code = request.form.get('code', '')
+        # Sichere Vergleich mit hmac.compare_digest (gegen Timing-Attacken)
         if hmac.compare_digest(code, ADMIN_CODE):
             session['admin_logged_in'] = True
             flash('Erfolgreich angemeldet.', 'success')
@@ -36,7 +51,7 @@ def login():
 
 @admin_bp.route('/logout')
 def logout():
-    """Admin logout."""
+    """Admin-Logout: Sitzung beenden und zur Login-Seite."""
     session.pop('admin_logged_in', None)
     flash('Sie wurden abgemeldet.', 'info')
     return redirect(url_for('admin.login'))
@@ -46,16 +61,19 @@ def logout():
 @admin_bp.route('/dashboard')
 @login_required
 def dashboard():
-    """Admin dashboard."""
+    """Admin-Dashboard: Übersicht für Administrator."""
     return render_template('admin_dashboard.html')
 
 
-# ---- STUDENTS ----
+
+# ============================================================================
+# SCHÜLER-VERWALTUNG
+# ============================================================================
 
 @admin_bp.route('/students')
 @login_required
 def list_students():
-    """List all students."""
+    """Schüler-Liste: Alle Schüler anzeigen."""
     students = db.get_students(include_ill=True)
     return render_template('admin_students.html', students=students)
 
@@ -63,13 +81,17 @@ def list_students():
 @admin_bp.route('/add_student', methods=['GET', 'POST'])
 @login_required
 def add_student():
-    """Add new student."""
+    """
+    Neuen Schüler hinzufügen.
+    Validiert erforderliche Felder.
+    """
     if request.method == 'POST':
         name = request.form.get('name', '').strip()
         class_group = request.form.get('class_group', '').strip()
         nummer = request.form.get('nummer', '').strip()
         ill = bool(request.form.get('ill'))
         
+        # Validierung: Alle Felder erforderlich
         if not all([name, class_group, nummer]):
             flash('Alle Felder müssen angegeben werden.', 'danger')
             return redirect(url_for('admin.add_student'))
@@ -87,7 +109,10 @@ def add_student():
 @admin_bp.route('/edit_student/<int:student_id>', methods=['GET', 'POST'])
 @login_required
 def edit_student(student_id):
-    """Edit student."""
+    """
+    Schüler-Informationen bearbeiten.
+    Validiert erforderliche Felder.
+    """
     student = db.get_student_by_id(student_id)
     if not student:
         flash('Schüler nicht gefunden.', 'danger')
@@ -104,6 +129,7 @@ def edit_student(student_id):
             return redirect(url_for('admin.edit_student', student_id=student_id))
         
         try:
+            # Aktualisiere nur die angegebenen Felder
             db.update_student(student_id, name=name, class_group=class_group, nummer=nummer, ill=ill)
             flash('Schüler erfolgreich aktualisiert.', 'success')
             return redirect(url_for('admin.list_students'))
@@ -116,7 +142,7 @@ def edit_student(student_id):
 @admin_bp.route('/delete_student/<int:student_id>', methods=['POST'])
 @login_required
 def delete_student(student_id):
-    """Delete student."""
+    """Schüler löschen."""
     try:
         db.delete_student(student_id)
         flash('Schüler erfolgreich gelöscht.', 'success')
@@ -125,12 +151,14 @@ def delete_student(student_id):
     return redirect(url_for('admin.list_students'))
 
 
-# ---- LÄUFE ----
+# ============================================================================
+# LAUF-VERANSTALTUNGEN
+# ============================================================================
 
 @admin_bp.route('/laeufe')
 @login_required
 def list_laeufe():
-    """List all running events."""
+    """Lauf-Liste: Alle bisherigen Läufe anzeigen."""
     laeufe = db.get_laeufe()
     return render_template('admin_laeufe.html', laeufe=laeufe)
 
@@ -138,7 +166,10 @@ def list_laeufe():
 @admin_bp.route('/start_lauf', methods=['GET', 'POST'])
 @login_required
 def start_lauf():
-    """Start a running event."""
+    """
+    Neuen Lauf starten.
+    Schlägt verfügbare Klassen/Gruppen vor.
+    """
     if request.method == 'POST':
         class_group = request.form.get('class_group', '').strip()
         if not class_group:
@@ -152,7 +183,7 @@ def start_lauf():
         except Exception as e:
             flash(f'Fehler beim Starten des Laufs: {e}', 'danger')
     
-    # Suggest class groups from students
+    # Verfügbare Klassen aus Schüler-Datenbank auslesen
     students = db.get_students()
     class_groups = sorted(set(s['class_group'] for s in students if s['class_group']))
     return render_template('admin_start_lauf.html', class_groups=class_groups)
@@ -161,7 +192,7 @@ def start_lauf():
 @admin_bp.route('/end_lauf', methods=['POST'])
 @login_required
 def end_lauf():
-    """End a running event."""
+    """Lauf beenden."""
     lauf_id = request.form.get('lauf_id')
     if not lauf_id:
         flash('Lauf-ID erforderlich.', 'danger')
@@ -175,12 +206,14 @@ def end_lauf():
     return redirect(url_for('admin.list_laeufe'))
 
 
-# ---- MEASUREMENTS ----
+# ============================================================================
+# ZEITMESSUNGEN
+# ============================================================================
 
 @admin_bp.route('/measurements')
 @login_required
 def list_measurements():
-    """List recent measurements."""
+    """Zeitmessungs-Übersicht: Letzte 100 Messungen anzeigen."""
     measurements = db.get_measurements(limit=100)
     return render_template('admin_measurements.html', measurements=measurements)
 
@@ -188,7 +221,7 @@ def list_measurements():
 @admin_bp.route('/clear_measurements', methods=['POST'])
 @login_required
 def clear_measurements():
-    """Clear all measurements."""
+    """Alle Zeitmessungen löschen."""
     try:
         db.clear_measurements()
         flash('Alle Messungen wurden gelöscht.', 'success')
@@ -197,17 +230,19 @@ def clear_measurements():
     return redirect(url_for('admin.list_measurements'))
 
 
-# ---- API ----
+# ============================================================================
+# API-ENDPUNKTE (JSON)
+# ============================================================================
 
 @admin_bp.route('/api/students')
 @login_required
 def api_students():
-    """Get all students (JSON)."""
+    """API: Alle Schüler als JSON (inkl. kranke)."""
     return jsonify(db.get_students(include_ill=True))
 
 
 @admin_bp.route('/api/measurements')
 @login_required
 def api_measurements():
-    """Get all measurements (JSON)."""
+    """API: Alle Zeitmessungen als JSON."""
     return jsonify(db.get_measurements())
