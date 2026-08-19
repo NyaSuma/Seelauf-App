@@ -1,7 +1,10 @@
 import time
 from datetime import datetime
 
+
 class Stopwatch:
+    """Simple stopwatch implementation with pause/resume functionality."""
+    
     def __init__(self):
         self.start_time = None
         self.pause_time = None
@@ -9,9 +12,9 @@ class Stopwatch:
         self.is_running = False
         self.is_paused = False
         self.laps = []
-
+    
     def start(self):
-        """Startet den Zeitmesser neu."""
+        """Start the stopwatch."""
         if not self.is_running and not self.is_paused:
             self.start_time = time.time()
             self.pause_time = None
@@ -19,44 +22,44 @@ class Stopwatch:
             self.is_running = True
             self.is_paused = False
             self.laps = []
-
+    
     def pause(self):
-        """Pausiert den Zeitmesser."""
+        """Pause the stopwatch."""
         if self.is_running and not self.is_paused:
             self.pause_time = time.time()
             self.is_running = False
             self.is_paused = True
-
+    
     def resume(self):
-        """Setzt den Zeitmesser fort."""
+        """Resume the stopwatch."""
         if self.is_paused and self.pause_time:
             self.total_pause_duration += time.time() - self.pause_time
             self.pause_time = None
             self.is_running = True
             self.is_paused = False
-
+    
     def stop(self):
-        """Stoppt den Zeitmesser und setzt ihn zurück."""
+        """Stop and reset the stopwatch."""
         self.is_running = False
         self.is_paused = False
         self.start_time = None
         self.pause_time = None
         self.total_pause_duration = 0
         self.laps = []
-
+    
     def get_elapsed_time(self):
-        """Gibt die verstrichene Zeit in Sekunden zurück."""
+        """Get elapsed time in seconds."""
         if self.start_time is None:
             return 0
-
+        
         if self.is_running:
             return time.time() - self.start_time - self.total_pause_duration
-        if self.is_paused and self.pause_time:
+        elif self.is_paused and self.pause_time:
             return self.pause_time - self.start_time - self.total_pause_duration
         return 0
-
+    
     def add_lap(self):
-        """Fügt eine Runde hinzu"""
+        """Add a lap time."""
         if self.is_running or self.is_paused:
             elapsed = self.get_elapsed_time()
             self.laps.append({
@@ -65,9 +68,10 @@ class Stopwatch:
                 'timestamp': datetime.now().isoformat()
             })
             return elapsed
-
+        return None
+    
     def get_formatted_time(self, seconds=None):
-        """Formatiert die Zeit als HH:MM:SS.MS"""
+        """Format time as HH:MM:SS.MS"""
         if seconds is None:
             seconds = self.get_elapsed_time()
         
@@ -77,9 +81,9 @@ class Stopwatch:
         milliseconds = int((seconds % 1) * 100)
         
         return f"{hours:02d}:{minutes:02d}:{secs:02d}.{milliseconds:02d}"
-
+    
     def get_status(self):
-        """Gibt den aktuellen Status zurück"""
+        """Get current stopwatch status."""
         return {
             'is_running': self.is_running,
             'is_paused': self.is_paused,
@@ -88,5 +92,6 @@ class Stopwatch:
             'laps': self.laps
         }
 
-# Globale Instanz
+
+# Global stopwatch instance
 stopwatch = Stopwatch()
