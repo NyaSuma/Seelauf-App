@@ -34,9 +34,10 @@ def create_app(test_config=None):
         PORT=int(os.getenv('FLASK_PORT', 8000)),
         SECRET_KEY=os.getenv('SECRET_KEY', 'dev-secret-key-change-in-production'),
         SESSION_COOKIE_HTTPONLY=True,
-        SESSION_COOKIE_SAMESITE='Lax'
+        SESSION_COOKIE_SAMESITE='Lax',
+        TEMPLATES_AUTO_RELOAD=True
     )
-    
+       
     # Test-Konfiguration überschreiben (falls vorhanden)
     if test_config:
         app.config.update(test_config)

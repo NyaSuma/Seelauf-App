@@ -4,16 +4,16 @@
 <link rel="stylesheet" href="{{ url_for('static', filename='css/zeitmesser.css') }}">
 {% endblock %}
 {% block content %}
-<div class="container py-4">
+<div class="zeitmesser-container py-4">
     <div class="row gy-4">
         <div class="col-lg-7">
             <div class="card shadow-sm border-0">
                 <div class="card-body">
                     <div class="text-center mb-4">
-                        <h1 class="display-6">⏱️ Zeitmesser</h1>
-                        <p class="text-muted">Schnell, sicher und zuverlässig Zeit nehmen.</p>
+                        <h1 class="display-6">Stop Uhr</h1>
                     </div>
                     <div class="display text-center mb-4">
+                        <div class="rain-container" id="rainContainer"></div>
                         <div class="time-display" id="timeDisplay">00:00:00.00</div>
                         <div class="status" id="statusDisplay">Bereit</div>
                     </div>
@@ -71,4 +71,5 @@
 {% endblock %}
 {% block extra_js %}
 <script src="{{ url_for('static', filename='js/zeitmesser.js') }}"></script>
+<script src="{{ url_for('static', filename='js/regen.js') }}"></script>
 {% endblock %}
