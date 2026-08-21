@@ -108,10 +108,6 @@ Die Konfiguration erfolgt über die `.env` Datei:
 ### laeufe
 - id, class_group, start_time, active
 
-## Development
-
-Zum Entwickeln:
-```bash
 # Virtual Environment aktivieren
 .venv\Scripts\Activate.ps1
 
@@ -121,8 +117,4 @@ pip install -r requirements.txt
 # App mit Debug-Modus starten
 set FLASK_DEBUG=1
 python app.py
-```
-
-## Lizenz
-
-Projektintern
+``

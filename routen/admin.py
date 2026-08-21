@@ -11,7 +11,7 @@ from flask import Blueprint, render_template, request, redirect, url_for, flash,
 import db
 
 admin_bp = Blueprint('admin', __name__, url_prefix='/admin')
-ADMIN_CODE = os.getenv('ADMIN_CODE', 'admin123')
+ADMIN_CODE = os.getenv('ADMIN_CODE', '123')
 
 
 def login_required(f):
