@@ -1,6 +1,13 @@
 let statusInterval = null;
 let currentStatus = { is_running: false, is_paused: false };
 
+// Für flüssige Anzeige: letzter bekannter Serverstand + Zeitpunkt des Empfangs.
+// Zwischen den Server-Syncs wird die Zeit lokal per requestAnimationFrame
+// weitergezählt, damit die Anzeige nicht an das 1s-Polling-Intervall gekoppelt ist.
+let clientElapsedBase = 0;
+let clientBaseTimestamp = 0;
+let displayLoopAktiv = false;
+
 function formatTime(seconds) {
     const hours = Math.floor(seconds / 3600);
     const minutes = Math.floor((seconds % 3600) / 60);
@@ -8,6 +15,23 @@ function formatTime(seconds) {
     const ms = Math.floor((seconds % 1) * 100);
 
     return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(secs).padStart(2, '0')}.${String(ms).padStart(2, '0')}`;
+}
+
+function updateDisplayLoop() {
+    if (!currentStatus.is_running) {
+        displayLoopAktiv = false;
+        return;
+    }
+    const jetzt = performance.now();
+    const verstrichen = clientElapsedBase + (jetzt - clientBaseTimestamp) / 1000;
+    document.getElementById('timeDisplay').textContent = formatTime(verstrichen);
+    requestAnimationFrame(updateDisplayLoop);
+}
+
+function starteDisplayLoop() {
+    if (displayLoopAktiv) return;
+    displayLoopAktiv = true;
+    requestAnimationFrame(updateDisplayLoop);
 }
 
 function setControls(status) {
@@ -50,11 +74,22 @@ async function fetchStatus() {
         }
         const status = await response.json();
         currentStatus = status;
-        document.getElementById('timeDisplay').textContent = status.formatted_time || '00:00:00.00';
+
+        // Sync-Basis für die flüssige lokale Interpolation setzen
+        clientElapsedBase = status.elapsed_time || 0;
+        clientBaseTimestamp = performance.now();
+
+        if (status.is_running) {
+            starteDisplayLoop();
+        } else {
+            // Nicht laufend: exakten Serverwert anzeigen (kein Interpolieren nötig)
+            document.getElementById('timeDisplay').textContent = status.formatted_time || '00:00:00.00';
+        }
+
         setControls(status);
 
         if (status.is_running && !statusInterval) {
-            statusInterval = setInterval(fetchStatus, 250);
+            statusInterval = setInterval(fetchStatus, 1000);
         }
         if (!status.is_running && statusInterval) {
             clearInterval(statusInterval);
