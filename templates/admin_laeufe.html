@@ -4,6 +4,7 @@
 <div class="container py-4">
     <h1 class="mb-4">Läufeverwaltung</h1>
     <a href="{{ url_for('admin.start_lauf') }}" class="btn btn-admin mb-3">+ Lauf starten</a>
+    <a href="{{ url_for('admin.erstelle_lauf') }}" class="btn btn-admin mb-3">+ Lauf erstellen</a>
     {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
             {% for category, message in messages %}

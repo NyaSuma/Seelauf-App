@@ -162,6 +162,30 @@ def list_laeufe():
     laeufe = db.get_laeufe()
     return render_template('admin_laeufe.html', laeufe=laeufe)
 
+@admin_bp.route('/erstellung_lauf', methods=['GET', 'POST'])
+@login_required
+def erstelle_lauf():
+    """
+    Neuen Lauf erstellen.
+    Validiert erforderliche Felder.
+    """
+    if request.method == 'POST':
+        name = request.form.get('name', '').strip()
+        date = request.form.get('date', '').strip()
+        
+        if not all([name, date]):
+            flash('Name und Datum sind erforderlich.', 'danger')
+            return redirect(url_for('admin.erstelle_lauf'))
+        
+        try:
+            db.create_lauf(name, date)
+            flash('Lauf erfolgreich erstellt.', 'success')
+            return redirect(url_for('admin.list_laeufe'))
+        except Exception as e:
+            flash(f'Fehler beim Erstellen des Laufs: {e}', 'danger')
+    
+    return render_template('admin_erstelle_lauf.html')
+
 
 @admin_bp.route('/start_lauf', methods=['GET', 'POST'])
 @login_required
