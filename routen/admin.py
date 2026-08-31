@@ -11,7 +11,7 @@ from flask import Blueprint, render_template, request, redirect, url_for, flash,
 import db
 
 admin_bp = Blueprint('admin', __name__, url_prefix='/admin')
-ADMIN_CODE = os.getenv('ADMIN_CODE', 'admin123')
+ADMIN_CODE = os.getenv('ADMIN_CODE', '123')
 
 
 def login_required(f):
@@ -161,6 +161,30 @@ def list_laeufe():
     """Lauf-Liste: Alle bisherigen Läufe anzeigen."""
     laeufe = db.get_laeufe()
     return render_template('admin_laeufe.html', laeufe=laeufe)
+
+@admin_bp.route('/erstellung_lauf', methods=['GET', 'POST'])
+@login_required
+def erstelle_lauf():
+    """
+    Neuen Lauf erstellen.
+    Validiert erforderliche Felder.
+    """
+    if request.method == 'POST':
+        name = request.form.get('name', '').strip()
+        date = request.form.get('date', '').strip()
+        
+        if not all([name, date]):
+            flash('Name und Datum sind erforderlich.', 'danger')
+            return redirect(url_for('admin.erstelle_lauf'))
+        
+        try:
+            db.create_lauf(name, date)
+            flash('Lauf erfolgreich erstellt.', 'success')
+            return redirect(url_for('admin.list_laeufe'))
+        except Exception as e:
+            flash(f'Fehler beim Erstellen des Laufs: {e}', 'danger')
+    
+    return render_template('admin_erstelle_lauf.html')
 
 
 @admin_bp.route('/start_lauf', methods=['GET', 'POST'])

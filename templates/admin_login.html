@@ -1,28 +1,106 @@
 {% extends "base.html" %}
 {% block title %}Admin Login - Seelauf App{% endblock %}
 {% block content %}
-<div class="container">
+<div class="container-login">
     <div class="row justify-content-center">
         <div class="col-md-4 col-lg-3">
-            <div class="overlay-content text-center">
-                <div class="timer-icon">🔐</div>
-                <h1>Admin Zugang</h1>
-                <form method="POST">
+            <div class="login-card text-center" id="loginCard">
+                <div class="login-icon-wrap" id="iconWrap">
+                    <span class="login-icon" id="lockIcon">🔐</span>
+                    <svg class="verify-ring" id="verifyRing" viewBox="0 0 100 100" aria-hidden="true">
+                        <circle class="verify-ring-track" cx="50" cy="50" r="40"></circle>
+                        <circle class="verify-ring-dot" cx="50" cy="10" r="4"></circle>
+                    </svg>
+                    <svg class="verify-check" id="verifyCheck" viewBox="0 0 100 100" aria-hidden="true">
+                        <circle class="verify-check-ring verify-check-ring-outer" cx="50" cy="50" r="46"></circle>
+                        <circle class="verify-check-ring verify-check-ring-inner" cx="50" cy="50" r="36"></circle>
+                        <path class="verify-check-mark" d="M31 51 L44 64 L70 34" fill="none"></path>
+                        <g class="verify-sparkles">
+                            <circle class="spark" cx="14" cy="20" r="2"></circle>
+                            <circle class="spark" cx="88" cy="16" r="2.4"></circle>
+                            <circle class="spark" cx="90" cy="70" r="2"></circle>
+                            <circle class="spark" cx="10" cy="76" r="2.6"></circle>
+                            <circle class="spark" cx="50" cy="4" r="1.8"></circle>
+                            <circle class="spark" cx="96" cy="46" r="1.8"></circle>
+                        </g>
+                    </svg>
+                </div>
+                <h1 id="loginTitle">Admin Zugang</h1>
+                <p class="login-subtitle" id="loginSubtitle">Bitte gib deinen Zugangscode ein.</p>
+                <form method="POST" id="loginForm" action="{{ url_for('admin.login') }}">
                     <div class="mb-3">
-                        <label for="code" class="form-label">Zugangscode:</label>
-                        <input type="password" class="form-control" id="code" name="code" required>
+                        <label for="code" class="form-label visually-hidden">Zugangscode:</label>
+                        <input type="password" class="form-control code-input" id="code" name="code" placeholder="Zugangscode" required autocomplete="current-password">
                     </div>
-                    <button type="submit" class="btn btn-admin w-100">Anmelden</button>
+                    <button type="submit" class="btn btn-admin w-100" id="loginBtn">
+                        <span id="loginBtnText">Anmelden</span>
+                    </button>
                 </form>
-                {% with messages = get_flashed_messages(with_categories=true) %}
-                    {% if messages %}
-                        {% for category, message in messages %}
-                            <div class="alert alert-{{category}} mt-3">{{ message }}</div>
-                        {% endfor %}
-                    {% endif %}
-                {% endwith %}
             </div>
         </div>
     </div>
 </div>
+{% endblock %}
+{% block extra_js %}
+<script>
+(function () {
+    const form = document.getElementById('loginForm');
+    const card = document.getElementById('loginCard');
+    const btn = document.getElementById('loginBtn');
+    const btnText = document.getElementById('loginBtnText');
+    const title = document.getElementById('loginTitle');
+    const subtitle = document.getElementById('loginSubtitle');
+
+    if (!form) return;
+
+    // Wackeln, falls die Seite direkt mit einer Fehlermeldung geladen wird
+    if (card.querySelector('.alert-danger')) {
+        card.classList.add('shake');
+        card.addEventListener('animationend', function handler(e) {
+            if (e.animationName === 'loginShake') {
+                card.classList.remove('shake');
+                card.removeEventListener('animationend', handler);
+            }
+        });
+    }
+
+    form.addEventListener('submit', async function (e) {
+        e.preventDefault();
+        if (btn.disabled) return;
+        btn.disabled = true;
+        card.classList.remove('shake');
+        card.classList.add('is-verifying');
+        btnText.textContent = 'Wird geprüft …';
+
+        let res;
+        try {
+            res = await fetch(form.action, {
+                method: 'POST',
+                body: new FormData(form),
+                credentials: 'same-origin'
+            });
+        } catch (err) {
+            // Netzwerkfehler: normaler Fallback ohne Animation
+            form.submit();
+            return;
+        }
+
+        if (res.redirected) {
+            card.classList.remove('is-verifying');
+            card.classList.add('is-success');
+            title.textContent = 'Erfolgreich angemeldet';
+            subtitle.textContent = 'Du wirst weitergeleitet …';
+            btnText.textContent = 'Weiterleiten …';
+            setTimeout(function () {
+                window.location.href = res.url;
+            }, 950);
+        } else {
+            const html = await res.text();
+            document.open();
+            document.write(html);
+            document.close();
+        }
+    });
+})();
+</script>
 {% endblock %}

@@ -1,12 +1,134 @@
 /* Custom styles for Seelauf App */
+
+:root {
+    --lake-deep: #0a2e3a;
+    --lake-mid: #12495a;
+    --lake-glow: #3fa9ba;
+    --sunrise: #ff8a5b;
+    --sunrise-soft: #ffc48a;
+    --foam: #eef7f6;
+}
+
+html, body {
+    min-height: 100%;
+}
+
 body {
     padding-top: 0;
+    position: relative;
+    overflow-x: hidden;
+    background:
+        radial-gradient(60% 45% at 78% 8%, rgba(255, 138, 91, 0.35), transparent 70%),
+        radial-gradient(90% 70% at 20% 100%, var(--lake-glow) 0%, transparent 55%),
+        linear-gradient(180deg, var(--lake-deep) 0%, var(--lake-mid) 55%, #0d3844 100%);
+    background-attachment: fixed;
+    color: var(--foam);
+}
+
+/* subtle grain so the gradient doesn't look flat */
+body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0.05;
+    mix-blend-mode: overlay;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* drifting waterline near the bottom of the page */
+body::after {
+    content: "";
+    position: fixed;
+    left: -10%;
+    right: -10%;
+    bottom: -4vh;
+    height: 22vh;
+    pointer-events: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 220' preserveAspectRatio='none'%3E%3Cpath d='M0 110 Q 120 60 240 110 T 480 110 T 720 110 T 960 110 T 1200 110 T 1440 110 V220 H0 Z' fill='%23eef7f6' fill-opacity='0.06'/%3E%3Cpath d='M0 150 Q 140 100 280 150 T 560 150 T 840 150 T 1120 150 T 1400 150 V220 H0 Z' fill='%233fa9ba' fill-opacity='0.10'/%3E%3C/svg%3E");
+    background-repeat: repeat-x;
+    background-size: 1440px 220px;
+    animation: drift 26s linear infinite;
+}
+
+@keyframes drift {
+    from { background-position-x: 0; }
+    to { background-position-x: -1440px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    body::after { animation: none; }
 }
 
 .navbar {
     position: sticky;
     top: 0;
     z-index: 1000;
+    border-radius: 30px;
+    margin-left: 1rem;
+    margin-right: 1rem;
+    margin-top: 1rem;
+}
+
+.navbar-lake {
+    background: linear-gradient(90deg, var(--lake-deep) 0%, var(--lake-mid) 100%);
+    box-shadow: 0 2px 20px rgba(0, 0, 0, 0.25);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.navbar-lake .navbar-brand {
+    font-weight: 600;
+    letter-spacing: 0.02em;
+}
+
+/* Sliding underline: a pseudo-element that grows in from the left on hover,
+   instead of just a color/background change */
+.navbar-lake .nav-link {
+    position: relative;
+    padding-bottom: 4px;
+    color: rgba(238, 247, 246, 0.85) !important;
+    transition: color 0.25s ease;
+}
+
+.navbar-lake .nav-link::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: -2px;
+    width: 100%;
+    height: 2px;
+    background: linear-gradient(90deg, var(--sunrise), var(--sunrise-soft));
+    border-radius: 2px;
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.35s ease;
+}
+
+.navbar-lake .nav-link:hover,
+.navbar-lake .nav-link:focus-visible {
+    color: var(--foam) !important;
+}
+
+.navbar-lake .nav-link:hover::after,
+.navbar-lake .nav-link:focus-visible::after {
+    transform: scaleX(1);
+}
+
+/* Active page keeps a permanent underline, but hover still animates
+   fresh from the left when the mouse re-enters */
+.navbar-lake .nav-link.active {
+    color: var(--foam) !important;
+    font-weight: 500;
+}
+.navbar-lake .nav-link.active::after {
+    transform: scaleX(1);
+    background: linear-gradient(90deg, var(--lake-glow), var(--sunrise-soft));
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .navbar-lake .nav-link::after {
+        transition: none;
+    }
 }
 .footer {
     margin-top: auto;
@@ -19,21 +141,59 @@ body {
 .container {
     max-width: 960px;
 }
+
+/* Homepage hero card — scoped so it doesn't affect the flash-message
+   .container that base.html renders on every page */
+.hero-card {
+    position: relative;
+    z-index: 1;
+    padding: 56px 40px;
+    margin-top: 8vh;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-radius: 20px;
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+}
+.hero-card h1 {
+    color: var(--foam);
+    text-shadow: 0 2px 20px rgba(255, 138, 91, 0.35);
+}
+.hero-card p.lead {
+    color: rgba(238, 247, 246, 0.8);
+}
+
 .btn-admin {
-    background-color: #0d6efd;
-    border-color: #0d6efd;
+    background: linear-gradient(135deg, #1b6fa8, #0e4f80);
+    border-color: #0e4f80;
+    color: white;
+    box-shadow: 0 8px 24px rgba(14, 79, 128, 0.45);
+    transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.3s ease;
 }
 .btn-admin:hover {
-    background-color: #0b5ed7;
-    border-color: #0a58ca;
+    background: linear-gradient(135deg, #2380c2, #145f95);
+    border-color: #145f95;
+    box-shadow: 0 12px 28px rgba(14, 79, 128, 0.55);
+    transform: translateY(-3px);
 }
 .btn-user {
-    background-color: #198754;
-    border-color: #198754;
+    background: linear-gradient(135deg, var(--sunrise), #e4622f);
+    border-color: #e4622f;
+    color: white;
+    box-shadow: 0 8px 24px rgba(228, 98, 47, 0.45);
+    transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.3s ease;
 }
 .btn-user:hover {
-    background-color: #157347;
-    border-color: #146c43;
+    background: linear-gradient(135deg, var(--sunrise-soft), var(--sunrise));
+    border-color: var(--sunrise);
+    box-shadow: 0 12px 28px rgba(228, 98, 47, 0.55);
+    transform: translateY(-3px);
+}
+.btn-admin:focus-visible,
+.btn-user:focus-visible {
+    outline: 3px solid var(--sunrise-soft);
+    outline-offset: 2px;
 }
 /* Overlay styling for login etc */
 .overlay {
@@ -74,5 +234,226 @@ body {
     100% {
         transform: scale(1);
         opacity: 1;
+    }
+}
+/* ============================================================
+   Admin-Login: Verify-Animation (Ring -> Haken)
+   ============================================================ */
+.login-card {
+    background: linear-gradient(160deg, #0c1f27 0%, #0a2a35 100%);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 18px;
+    padding: 40px 30px;
+    margin-top: 6vh;
+    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.45);
+    color: var(--foam);
+    width: 100%;    
+}
+
+.login-card h1 {
+    font-size: 1.5rem;
+    margin-bottom: 0.4rem;
+}
+
+.login-subtitle {
+    color: rgba(238, 247, 246, 0.65);
+    font-size: 0.9rem;
+    margin-bottom: 1.5rem;
+}
+
+.code-input {
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: var(--foam);
+    text-align: center;
+    letter-spacing: 0.15em;
+}
+.code-input::placeholder {
+    color: rgba(238, 247, 246, 0.4);
+    letter-spacing: normal;
+}
+.code-input:focus {
+    background: rgba(255, 255, 255, 0.09);
+    border-color: var(--sunrise);
+    color: var(--foam);
+    box-shadow: 0 0 0 0.2rem rgba(255, 138, 91, 0.25);
+}
+
+/* Icon stack: lock / ring / checkmark are layered and cross-faded */
+.login-icon-wrap {
+    position: relative;
+    width: 200px;
+    height: 200px;
+    margin: 0 auto 1.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.login-icon {
+    font-size: 10.6rem;
+    transition: opacity 0.25s ease, transform 0.25s ease;
+    align-content: center;
+}
+
+.verify-ring,
+.verify-check {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    transform: scale(0.7);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    pointer-events: none;
+}
+
+.verify-ring-track {
+    fill: none;
+    stroke: rgba(255, 255, 255, 0.15);
+    stroke-width: 4;
+}
+.verify-ring-dot {
+    fill: var(--sunrise);
+}
+
+.verify-check-ring {
+    fill: none;
+    stroke: #34d399;
+    stroke-width: 3;
+    opacity: 0;
+    transform-origin: 50% 50%;
+}
+.verify-check-mark {
+    stroke: #34d399;
+    stroke-width: 6;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-dasharray: 60;
+    stroke-dashoffset: 60;
+}
+.verify-sparkles .spark {
+    fill: #34d399;
+    opacity: 0;
+}
+
+/* State: verifying */
+.login-card.is-verifying .login-icon {
+    opacity: 0;
+    transform: scale(0.7);
+}
+.login-card.is-verifying .verify-ring {
+    opacity: 1;
+    transform: scale(1);
+}
+.login-card.is-verifying .verify-ring-track {
+    animation: none;
+}
+.login-card.is-verifying .verify-ring {
+    animation: verifySpin 0.9s linear infinite;
+}
+
+/* State: success — ring morphs into a checkmark with a sparkle burst */
+.login-card.is-success .login-icon {
+    opacity: 0;
+}
+.login-card.is-success .verify-ring {
+    opacity: 0;
+}
+.login-card.is-success .verify-check {
+    opacity: 1;
+    transform: scale(1);
+}
+.login-card.is-success .verify-check-ring-outer {
+    animation: checkRingOuter 0.6s ease-out forwards;
+}
+.login-card.is-success .verify-check-ring-inner {
+    animation: checkRingInner 0.5s ease-out 0.05s forwards;
+}
+.login-card.is-success .verify-check-mark {
+    animation: checkDraw 0.4s ease-out 0.25s forwards;
+}
+.login-card.is-success .verify-sparkles .spark {
+    animation: sparkOut 0.7s ease-out 0.3s forwards;
+}
+.login-card.is-success .verify-sparkles .spark:nth-child(2) { animation-delay: 0.34s; }
+.login-card.is-success .verify-sparkles .spark:nth-child(3) { animation-delay: 0.38s; }
+.login-card.is-success .verify-sparkles .spark:nth-child(4) { animation-delay: 0.42s; }
+.login-card.is-success .verify-sparkles .spark:nth-child(5) { animation-delay: 0.46s; }
+.login-card.is-success .verify-sparkles .spark:nth-child(6) { animation-delay: 0.5s; }
+
+.login-card.is-success h1,
+.login-card.is-success .login-subtitle {
+    color: #34d399;
+    transition: color 0.3s ease;
+}
+.login-card.is-success .login-subtitle {
+    color: rgba(238, 247, 246, 0.7);
+}
+
+.login-card.is-success #loginBtn,
+.login-card.is-verifying #loginBtn {
+    opacity: 0.75;
+    cursor: default;
+}
+
+@keyframes verifySpin {
+    from { transform: scale(1) rotate(0deg); }
+    to { transform: scale(1) rotate(360deg); }
+}
+
+@keyframes checkRingOuter {
+    from { opacity: 0; transform: scale(0.6); }
+    to { opacity: 0.5; transform: scale(1); }
+}
+@keyframes checkRingInner {
+    from { opacity: 0; transform: scale(0.5); }
+    to { opacity: 1; transform: scale(1); }
+}
+@keyframes checkDraw {
+    to { stroke-dashoffset: 0; }
+}
+@keyframes sparkOut {
+    0%   { opacity: 0; transform: translate(0, 0) scale(0.4); }
+    40%  { opacity: 1; }
+    100% { opacity: 0; transform: translate(var(--spark-x, 0), var(--spark-y, -8px)) scale(1); }
+}
+
+.verify-sparkles .spark:nth-child(1) { --spark-x: -10px; --spark-y: -10px; }
+.verify-sparkles .spark:nth-child(2) { --spark-x: 10px;  --spark-y: -12px; }
+.verify-sparkles .spark:nth-child(3) { --spark-x: 12px;  --spark-y: 10px; }
+.verify-sparkles .spark:nth-child(4) { --spark-x: -12px; --spark-y: 10px; }
+.verify-sparkles .spark:nth-child(5) { --spark-x: 0px;   --spark-y: -14px; }
+.verify-sparkles .spark:nth-child(6) { --spark-x: 14px;  --spark-y: 4px; }
+
+/* Wrong code: shake feedback */
+.login-card.shake {
+    animation: loginShake 0.45s ease;
+}
+@keyframes loginShake {
+    0%, 100% { transform: translateX(0); }
+    20%      { transform: translateX(-8px); }
+    40%      { transform: translateX(7px); }
+    60%      { transform: translateX(-5px); }
+    80%      { transform: translateX(4px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .verify-ring,
+    .verify-check,
+    .verify-check-ring,
+    .verify-check-mark,
+    .verify-sparkles .spark,
+    .login-card.shake {
+        animation: none !important;
+        transition: opacity 0.2s ease !important;
+    }
+    .login-card.is-verifying .verify-ring,
+    .login-card.is-success .verify-check {
+        opacity: 1;
+        transform: scale(1);
+    }
+    .login-card.is-success .verify-check-mark {
+        stroke-dashoffset: 0;
     }
 }

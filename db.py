@@ -190,11 +190,41 @@ def delete_student(student_id):
         cursor = conn.cursor()
         cursor.execute("DELETE FROM students WHERE id = ?", (student_id,))
         conn.commit()
+# ============================================================================
+# LAUF-VERWALTUNG
+# ============================================================================
+
+def create_lauf(class_group, start_time=None, active=True):
+    """
+    Neuen Lauf für eine Klasse erstellen.
+    
+    Args:
+        class_group: Klasse/Gruppe
+        start_time: Startzeit (Standard: jetzt)
+        active: Ist der Lauf aktiv? (Standard: True)
+    
+    Returns:
+        ID des neu erstellten Laufs
+    """
+    if start_time is None:
+        start_time = datetime.now().isoformat()
+    
+    with get_db_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute(
+            "INSERT INTO laeufe (class_group, start_time, active) VALUES (?, ?, ?)",
+            (class_group, start_time, int(active))
+        )
+        conn.commit()
+        return cursor.lastrowid
+
+
+
+
 
 # ============================================================================
 # LAUF-VERANSTALTUNGEN (z.B. Sporttag pro Klasse)
 # ============================================================================
-
 def start_lauf(class_group):
     """
     Neuen Lauf für eine Klasse starten.
