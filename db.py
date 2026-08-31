@@ -287,6 +287,26 @@ def end_lauf(lauf_id):
         cursor.execute("UPDATE laeufe SET active = 0 WHERE id = ?", (lauf_id,))
         conn.commit()
 
+def delete_lauf(lauf_id):
+    """Lauf löschen (inklusive aller zugehörigen Zeitmessungen)."""
+    with get_db_connection() as conn:
+        cursor = conn.cursor()
+        # Zuerst alle Zeitmessungen dieses Laufs löschen
+        cursor.execute("DELETE FROM measurements WHERE lauf_id = ?", (lauf_id,))
+        # Dann den Lauf selbst löschen
+        cursor.execute("DELETE FROM laeufe WHERE id = ?", (lauf_id,))
+        conn.commit()
+
+def restart_lauf(lauf_id):
+    """Lauf zurücksetzen (alle Zeitmessungen löschen, Lauf bleibt aktiv)."""
+    with get_db_connection() as conn:
+        cursor = conn.cursor()
+        # Alle Zeitmessungen dieses Laufs löschen
+        cursor.execute("DELETE FROM measurements WHERE lauf_id = ?", (lauf_id,))
+        # Lauf als aktiv markieren (falls er deaktiviert war)
+        cursor.execute("UPDATE laeufe SET active = 1 WHERE id = ?", (lauf_id,))
+        conn.commit()
+
 # ============================================================================
 # ZEITMESSUNGEN
 # ============================================================================

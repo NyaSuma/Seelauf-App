@@ -229,7 +229,38 @@ def end_lauf():
         flash(f'Fehler: {e}', 'danger')
     return redirect(url_for('admin.list_laeufe'))
 
+#Restart Lauf
+@admin_bp.route('/restart_lauf', methods=['POST'])
+@login_required
+def restart_lauf():
+    """Lauf neustarten."""
+    lauf_id = request.form.get('lauf_id')
+    if not lauf_id:
+        flash('Lauf-ID erforderlich.', 'danger')
+        return redirect(url_for('admin.list_laeufe'))
+    
+    try:
+        db.restart_lauf(int(lauf_id))
+        flash('Lauf neu gestartet.', 'success')
+    except Exception as e:
+        flash(f'Fehler: {e}', 'danger')
+    return redirect(url_for('admin.list_laeufe'))
 
+@admin_bp.route('/delete_lauf', methods=['POST'])
+@login_required
+def delete_lauf():
+    """Lauf löschen."""
+    lauf_id = request.form.get('lauf_id')
+    if not lauf_id:
+        flash('Lauf-ID erforderlich.', 'danger')
+        return redirect(url_for('admin.list_laeufe'))
+    
+    try:
+        db.delete_lauf(int(lauf_id))
+        flash('Lauf gelöscht.', 'success')
+    except Exception as e:
+        flash(f'Fehler: {e}', 'danger')
+    return redirect(url_for('admin.list_laeufe'))
 # ============================================================================
 # ZEITMESSUNGEN
 # ============================================================================
