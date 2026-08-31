@@ -1,44 +1,59 @@
+﻿"""
+Datenbank-Modul für Seelauf-App
+Verwaltung von Schülern, Zeitmessungen und Laufveranstaltungen
+"""
 import sqlite3
 from datetime import datetime
 import os
 from contextlib import contextmanager
+from pathlib import Path
 
-# Database path - can be overridden by environment variable or app config
-DATABASE_PATH = os.getenv('DATABASE_PATH', 'instance/seelauf.db')
+# Datenbank-Pfad konfigurieren
+DB_PATH = Path(__file__).parent / 'instance' / 'seelauf.db'
+
+
+def get_database_path():
+    """Datenbank-Pfad dynamisch auflösen (Umgebungsvariable oder Standard)."""
+    return Path(os.getenv('DATABASE_PATH', DB_PATH)).resolve()
+
 
 @contextmanager
 def get_db_connection():
-    """Context manager for database connections."""
-    conn = None
+    """
+    Context Manager für Datenbankverbindungen.
+    Stellt sicher, dass Verbindungen automatisch geschlossen werden.
+    """
+    db_path = get_database_path()
+    db_path.parent.mkdir(parents=True, exist_ok=True)
+    
+    # Verbindung öffnen
+    conn = sqlite3.connect(str(db_path), timeout=5.0)
+    conn.row_factory = sqlite3.Row  # Rückgabe als dict-ähnliche Objekte
+    conn.execute('PRAGMA foreign_keys = ON')  # Fremdschlüssel aktivieren
+    conn.execute('PRAGMA journal_mode = WAL')  # Write-Ahead Logging für Stabilität
+    
     try:
-        conn = sqlite3.connect(DATABASE_PATH)
-        conn.row_factory = sqlite3.Row  # Return rows as dictionary-like objects
         yield conn
-    except sqlite3.Error as e:
-        if conn:
-            conn.rollback()
-        raise e
+    except sqlite3.Error:
+        conn.rollback()
+        raise
     finally:
-        if conn:
-            conn.close()
+        conn.close()
 
 def init_db():
-    """Initialize the database tables if they don't exist."""
-    try:
-        with get_db_connection() as conn:
-            cursor = conn.cursor()
-            # Students table
-            cursor.execute("""
+    """Datenbank-Tabellen initialisieren (falls nicht vorhanden)."""
+    with get_db_connection() as conn:
+        conn.executescript("""
+            -- Schüler-Tabelle
             CREATE TABLE IF NOT EXISTS students (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 name TEXT NOT NULL,
                 class_group TEXT,
                 nummer TEXT UNIQUE NOT NULL,
                 ill INTEGER DEFAULT 0
-            )
-            """)
-            # Measurements table
-            cursor.execute("""
+            );
+            
+            -- Zeitmessungs-Tabelle
             CREATE TABLE IF NOT EXISTS measurements (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 student_id INTEGER NOT NULL,
@@ -47,251 +62,323 @@ def init_db():
                 timestamp TEXT NOT NULL,
                 FOREIGN KEY (student_id) REFERENCES students (id),
                 FOREIGN KEY (lauf_id) REFERENCES laeufe (id)
-            )
-            """)
-            # Läufe (running events) table
-            cursor.execute("""
+            );
+            
+            -- Lauf-Veranstaltungen (z.B. pro Klasse)
             CREATE TABLE IF NOT EXISTS laeufe (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 class_group TEXT NOT NULL,
                 start_time TEXT NOT NULL,
                 active INTEGER DEFAULT 1
-            )
-            """)
-            conn.commit()
-    except sqlite3.Error as e:
-        print(f"Database initialization error: {e}")
-        raise
+            );
+            
+            -- Indizes für schnellere Abfragen
+            CREATE INDEX IF NOT EXISTS idx_students_nummer ON students(nummer);
+            CREATE INDEX IF NOT EXISTS idx_measurements_student_id ON measurements(student_id);
+            CREATE INDEX IF NOT EXISTS idx_measurements_lauf_id ON measurements(lauf_id);
+            CREATE INDEX IF NOT EXISTS idx_laeufe_class_group ON laeufe(class_group);
+        """)
+        conn.commit()
 
-# Initialize database on module import
+
+# Datenbank beim Start initialisieren
 init_db()
 
-# ---- STUDENT CRUD ----
+# ============================================================================
+# SCHÜLER-VERWALTUNG
+# ============================================================================
+
 def add_student(name, class_group, nummer, ill=False):
-    """Fügt einen neuen Schüler hinzu."""
-    try:
-        with get_db_connection() as conn:
-            cursor = conn.cursor()
-            cursor.execute("""
-            INSERT INTO students (name, class_group, nummer, ill)
-            VALUES (?, ?, ?, ?)
-            """, (name, class_group, nummer, 1 if ill else 0))
-            conn.commit()
-            return cursor.lastrowid
-    except sqlite3.Error as e:
-        print(f"Error adding student: {e}")
-        raise
+    """
+    Neuen Schüler hinzufügen.
+    
+    Args:
+        name: Name des Schülers
+        class_group: Klasse/Gruppe
+        nummer: Startnummer
+        ill: Ist der Schüler krank? (Standard: False)
+    
+    Returns:
+        ID des neu eingefügten Schülers
+    """
+    with get_db_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute(
+            "INSERT INTO students (name, class_group, nummer, ill) VALUES (?, ?, ?, ?)",
+            (name, class_group, nummer, int(ill))
+        )
+        conn.commit()
+        return cursor.lastrowid
+
 
 def get_students(include_ill=False):
-    """Ruft alle Schüler ab. Wenn include_ill=False, nur gesunde Schüler."""
-    try:
-        with get_db_connection() as conn:
-            cursor = conn.cursor()
-            if include_ill:
-                cursor.execute("SELECT * FROM students ORDER BY class_group, name")
-            else:
-                cursor.execute("SELECT * FROM students WHERE ill = 0 ORDER BY class_group, name")
-            rows = cursor.fetchall()
-            return [dict(row) for row in rows]
-    except sqlite3.Error as e:
-        print(f"Error retrieving students: {e}")
-        raise
+    """
+    Alle Schüler abrufen.
+    
+    Args:
+        include_ill: Auch kranke Schüler anzeigen? (Standard: nur gesunde)
+    
+    Returns:
+        Liste aller Schüler als Dictionaries
+    """
+    with get_db_connection() as conn:
+        cursor = conn.cursor()
+        query = "SELECT * FROM students"
+        if not include_ill:
+            query += " WHERE ill = 0"
+        query += " ORDER BY class_group, name"
+        cursor.execute(query)
+        return [dict(row) for row in cursor.fetchall()]
 
-def get_student_by_nummer(nummer):
-    """Ruft einen Schüler anhand seiner Nummer ab."""
-    try:
-        with get_db_connection() as conn:
-            cursor = conn.cursor()
-            cursor.execute("SELECT * FROM students WHERE nummer = ?", (nummer,))
-            row = cursor.fetchone()
-            return dict(row) if row else None
-    except sqlite3.Error as e:
-        print(f"Error retrieving student by nummer: {e}")
-        raise
 
 def get_student_by_id(student_id):
-    """Ruft einen Schüler anhand seiner ID ab."""
-    try:
-        with get_db_connection() as conn:
-            cursor = conn.cursor()
-            cursor.execute("SELECT * FROM students WHERE id = ?", (student_id,))
-            row = cursor.fetchone()
-            return dict(row) if row else None
-    except sqlite3.Error as e:
-        print(f"Error retrieving student by id: {e}")
-        raise
+    """Schüler anhand seiner ID abrufen."""
+    with get_db_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM students WHERE id = ?", (student_id,))
+        row = cursor.fetchone()
+        return dict(row) if row else None
+
+
+def get_student_by_nummer(nummer):
+    """Schüler anhand seiner Startnummer abrufen."""
+    with get_db_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM students WHERE nummer = ?", (nummer,))
+        row = cursor.fetchone()
+        return dict(row) if row else None
+
 
 def update_student(student_id, name=None, class_group=None, nummer=None, ill=None):
-    """Aktualisiert einen Schüler."""
-    try:
-        with get_db_connection() as conn:
-            cursor = conn.cursor()
-            updates = []
-            params = []
-            if name is not None:
-                updates.append("name = ?")
-                params.append(name)
-            if class_group is not None:
-                updates.append("class_group = ?")
-                params.append(class_group)
-            if nummer is not None:
-                updates.append("nummer = ?")
-                params.append(nummer)
-            if ill is not None:
-                updates.append("ill = ?")
-                params.append(1 if ill else 0)
-            if not updates:
-                return
-            params.append(student_id)
-            query = f"UPDATE students SET {', '.join(updates)} WHERE id = ?"
-            cursor.execute(query, tuple(params))
-            conn.commit()
-    except sqlite3.Error as e:
-        print(f"Error updating student: {e}")
-        raise
+    """
+    Schüler-Informationen aktualisieren (optional).
+    
+    Args:
+        student_id: ID des Schülers
+        name, class_group, nummer, ill: Zu aktualisierende Felder (None = nicht ändern)
+    """
+    # Nur die zu ändernden Felder sammeln
+    updates = []
+    params = []
+    
+    if name is not None:
+        updates.append("name = ?")
+        params.append(name)
+    if class_group is not None:
+        updates.append("class_group = ?")
+        params.append(class_group)
+    if nummer is not None:
+        updates.append("nummer = ?")
+        params.append(nummer)
+    if ill is not None:
+        updates.append("ill = ?")
+        params.append(int(ill))
+    
+    if not updates:
+        return  # Nichts zu ändern
+    
+    params.append(student_id)
+    with get_db_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute(f"UPDATE students SET {', '.join(updates)} WHERE id = ?", params)
+        conn.commit()
+
 
 def delete_student(student_id):
-    """Löscht einen Schüler."""
-    try:
-        with get_db_connection() as conn:
-            cursor = conn.cursor()
-            cursor.execute("DELETE FROM students WHERE id = ?", (student_id,))
-            conn.commit()
-    except sqlite3.Error as e:
-        print(f"Error deleting student: {e}")
-        raise
+    """Schüler löschen."""
+    with get_db_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute("DELETE FROM students WHERE id = ?", (student_id,))
+        conn.commit()
 
-# ---- LÄUFE ----
+# ============================================================================
+# LAUF-VERANSTALTUNGEN (z.B. Sporttag pro Klasse)
+# ============================================================================
+
 def start_lauf(class_group):
-    """Startet einen Lauf für die angegebene Klasse/Gruppe.
-    Deaktiviert eventuell vorher aktive Läufe derselben Gruppe (optional)."""
-    try:
-        with get_db_connection() as conn:
-            cursor = conn.cursor()
-            # Optionally deactivate previous active lauf for same group
-            cursor.execute("UPDATE laeufe SET active = 0 WHERE class_group = ? AND active = 1", (class_group,))
-            start_time = datetime.now().isoformat()
-            cursor.execute("""
-            INSERT INTO laeufe (class_group, start_time, active)
-            VALUES (?, ?, 1)
-            """, (class_group, start_time))
-            conn.commit()
-            return cursor.lastrowid
-    except sqlite3.Error as e:
-        print(f"Error starting lauf: {e}")
-        raise
+    """
+    Neuen Lauf für eine Klasse starten.
+    (Beendet automatisch vorherige Läufe dieser Klasse)
+    
+    Args:
+        class_group: Klasse/Gruppe
+    
+    Returns:
+        ID des neuen Laufs
+    """
+    with get_db_connection() as conn:
+        cursor = conn.cursor()
+        # Vorherige aktive Läufe deaktivieren
+        cursor.execute(
+            "UPDATE laeufe SET active = 0 WHERE class_group = ? AND active = 1",
+            (class_group,)
+        )
+        # Neuen Lauf starten
+        cursor.execute(
+            "INSERT INTO laeufe (class_group, start_time, active) VALUES (?, ?, 1)",
+            (class_group, datetime.now().isoformat())
+        )
+        conn.commit()
+        return cursor.lastrowid
+
 
 def get_active_lauf(class_group):
-    """Gibt den letzten aktiven Lauf für die angegebene Klasse/Gruppe zurück."""
-    try:
-        with get_db_connection() as conn:
-            cursor = conn.cursor()
-            cursor.execute("""
-            SELECT * FROM laeufe WHERE class_group = ? AND active = 1 ORDER BY start_time DESC LIMIT 1
-            """, (class_group,))
-            row = cursor.fetchone()
-            return dict(row) if row else None
-    except sqlite3.Error as e:
-        print(f"Error retrieving active lauf: {e}")
-        raise
+    """Aktuellen aktiven Lauf für eine Klasse abrufen."""
+    with get_db_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute(
+            "SELECT * FROM laeufe WHERE class_group = ? AND active = 1 ORDER BY start_time DESC LIMIT 1",
+            (class_group,)
+        )
+        row = cursor.fetchone()
+        return dict(row) if row else None
+
+
+def get_active_runs():
+    """Alle aktuell aktiven Läufe abrufen."""
+    with get_db_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM laeufe WHERE active = 1 ORDER BY start_time DESC")
+        return [dict(row) for row in cursor.fetchall()]
+
 
 def get_laeufe(limit=50):
-    """Ruft früher completed und aktive Läufe ab (neueste zuerst)."""
-    try:
-        with get_db_connection() as conn:
-            cursor = conn.cursor()
-            cursor.execute("""
-            SELECT * FROM laeufe ORDER BY start_time DESC LIMIT ?
-            """, (limit,))
-            rows = cursor.fetchall()
-            return [dict(row) for row in rows]
-    except sqlite3.Error as e:
-        print(f"Error retrieving laeufe: {e}")
-        raise
+    """Frühere Läufe abrufen (neueste zuerst)."""
+    with get_db_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM laeufe ORDER BY start_time DESC LIMIT ?", (limit,))
+        return [dict(row) for row in cursor.fetchall()]
+
 
 def end_lauf(lauf_id):
-    """Deaktiviert einen Lauf (setzt active=0)."""
-    try:
-        with get_db_connection() as conn:
-            cursor = conn.cursor()
-            cursor.execute("UPDATE laeufe SET active = 0 WHERE id = ?", (lauf_id,))
-            conn.commit()
-    except sqlite3.Error as e:
-        print(f"Error ending lauf: {e}")
-        raise
+    """Lauf beenden (als inaktiv markieren)."""
+    with get_db_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute("UPDATE laeufe SET active = 0 WHERE id = ?", (lauf_id,))
+        conn.commit()
 
-# ---- MEASUREMENTS ----
-def save_measurement(student_id, zeit, lauf_id=None):
-    """Speichert eine Zeitmessung für einen Schüler.
-    Wenn lauf_id nicht übergeben wird, wird der aktive Lauf für die Klasse des Schülers gesucht."""
-    try:
-        with get_db_connection() as conn:
-            cursor = conn.cursor()
-            if lauf_id is None:
-                # Get student's class group
-                cursor.execute("SELECT class_group FROM students WHERE id = ?", (student_id,))
-                row = cursor.fetchone()
-                if row:
-                    class_group = row['class_group']
-                    lauf = get_active_lauf(class_group)
-                    lauf_id = lauf['id'] if lauf else None
-            timestamp = datetime.now().isoformat()
-            cursor.execute("""
-            INSERT INTO measurements (student_id, lauf_id, zeit, timestamp)
-            VALUES (?, ?, ?, ?)
-            """, (student_id, lauf_id, zeit, timestamp))
-            conn.commit()
-            return cursor.lastrowid
-    except sqlite3.Error as e:
-        print(f"Error saving measurement: {e}")
-        raise
+# ============================================================================
+# ZEITMESSUNGEN
+# ============================================================================
+
+def save_measurement(student_identifier, zeit, lauf_id=None):
+    """
+    Zeitmessung für einen Schüler speichern.
+    
+    Args:
+        student_identifier: Schüler-ID (int) oder Startnummer (str)
+        zeit: Zeit im Format HH:MM:SS.MS
+        lauf_id: Optional - Lauf-ID (wenn nicht angegeben, wird aktiver Lauf gesucht)
+    
+    Returns:
+        ID der neuen Zeitmessung
+    """
+    with get_db_connection() as conn:
+        cursor = conn.cursor()
+        
+        # Schüler-ID auflösen (versuche zuerst als ID, dann als Nummer)
+        student_id = None
+        try:
+            student_id = int(student_identifier)
+            cursor.execute("SELECT id FROM students WHERE id = ?", (student_id,))
+            if not cursor.fetchone():
+                student_id = None
+        except (ValueError, TypeError):
+            pass
+        
+        # Wenn nicht als ID gefunden, nach Nummer suchen
+        if student_id is None:
+            cursor.execute("SELECT id FROM students WHERE nummer = ?", (str(student_identifier),))
+            row = cursor.fetchone()
+            student_id = row['id'] if row else None
+        
+        # Wenn Schüler nicht existiert, Platzhalter-Schüler erstellen
+        if student_id is None:
+            cursor.execute(
+                "INSERT INTO students (name, class_group, nummer, ill) VALUES (?, ?, ?, ?)",
+                ("", None, str(student_identifier), 0)
+            )
+            student_id = cursor.lastrowid
+        
+        # Falls keine Lauf-ID angegeben, aktiven Lauf der Schüler-Klasse suchen
+        if lauf_id is None:
+            cursor.execute("SELECT class_group FROM students WHERE id = ?", (student_id,))
+            row = cursor.fetchone()
+            if row and row['class_group']:
+                lauf = get_active_lauf(row['class_group'])
+                lauf_id = lauf['id'] if lauf else None
+        
+        # Zeitmessung speichern
+        cursor.execute(
+            "INSERT INTO measurements (student_id, lauf_id, zeit, timestamp) VALUES (?, ?, ?, ?)",
+            (student_id, lauf_id, zeit, datetime.now().isoformat())
+        )
+        conn.commit()
+        return cursor.lastrowid
+
 
 def get_measurements(limit=None):
-    """Ruft alle Messungen mit Schüler- und Lauf-Info ab."""
-    try:
-        with get_db_connection() as conn:
-            cursor = conn.cursor()
-            query = """
+    """
+    Alle Zeitmessungen mit Schüler- und Lauf-Info abrufen.
+    
+    Args:
+        limit: Maximale Anzahl (Standard: alle)
+    
+    Returns:
+        Liste mit Zeitmessungen (mit Student und Lauf-Details)
+    """
+    with get_db_connection() as conn:
+        cursor = conn.cursor()
+        query = """
             SELECT m.id, m.zeit, m.timestamp, s.name, s.class_group, s.nummer,
                    l.class_group AS lauf_class, l.start_time AS lauf_start
             FROM measurements m
             JOIN students s ON m.student_id = s.id
             LEFT JOIN laeufe l ON m.lauf_id = l.id
             ORDER BY m.id DESC
-            """
-            if limit:
-                query += f" LIMIT {limit}"
+        """
+        if limit:
+            query += " LIMIT ?"
+            cursor.execute(query, (limit,))
+        else:
             cursor.execute(query)
-            rows = cursor.fetchall()
-            return [dict(row) for row in rows]
-    except sqlite3.Error as e:
-        print(f"Error retrieving measurements: {e}")
-        raise
+        return [dict(row) for row in cursor.fetchall()]
+
+
+def get_recent_measurements(limit=20):
+    """Die neuesten Zeitmessungen abrufen."""
+    return get_measurements(limit=limit)
+
 
 def get_measurements_by_student(student_id):
-    """Ruft alle Messungen eines bestimmten Schülers ab."""
-    try:
-        with get_db_connection() as conn:
-            cursor = conn.cursor()
-            cursor.execute("""
-            SELECT m.id, m.zeit, m.timestamp
-            FROM measurements m
-            WHERE m.student_id = ?
-            ORDER BY m.id DESC
-            """, (student_id,))
-            rows = cursor.fetchall()
-            return [dict(row) for row in rows]
-    except sqlite3.Error as e:
-        print(f"Error retrieving measurements for student: {e}")
-        raise
+    """Alle Zeitmessungen eines bestimmten Schülers abrufen."""
+    with get_db_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute(
+            "SELECT id, zeit, timestamp FROM measurements WHERE student_id = ? ORDER BY id DESC",
+            (student_id,)
+        )
+        return [dict(row) for row in cursor.fetchall()]
+
+
+def get_measurements_by_number(nummer):
+    """Alle Zeitmessungen für eine Startnummer abrufen."""
+    with get_db_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute(
+            """SELECT m.id, m.zeit, m.timestamp, s.name, s.class_group, s.nummer
+               FROM measurements m
+               JOIN students s ON m.student_id = s.id
+               WHERE s.nummer = ?
+               ORDER BY m.id DESC""",
+            (nummer,)
+        )
+        return [dict(row) for row in cursor.fetchall()]
+
 
 def clear_measurements():
-    """Löscht alle Zeitmessungen."""
-    try:
-        with get_db_connection() as conn:
-            cursor = conn.cursor()
-            cursor.execute("DELETE FROM measurements")
-            conn.commit()
-    except sqlite3.Error as e:
-        print(f"Error clearing measurements: {e}")
-        raise
+    """Alle Zeitmessungen löschen."""
+    with get_db_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute("DELETE FROM measurements")
+        conn.commit()

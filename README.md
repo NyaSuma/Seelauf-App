@@ -1,95 +1,128 @@
 # Seelauf-App
 
-Eine Flask-basierte Anwendung zur Zeitmessung bei Laufveranstaltungen.
+Ein Flask-basiertes Anwendung zur Verwaltung von Schülerlaufzeiten mit Admin-Dashboard und Zeitmesser-Interface.
 
 ## Features
 
-- Start/Stop/Pausen eines Stoppuhrs
-- Runde Zeiten (Lap) erfassen
-- Zeiten mit Startnummer speichern
-- Aufzeichnung aller Messungen in SQLite-Datenbank
-- RESTful API zur Erfassung der Zeiten
-- Einfache Web-Oberfläche
+- 🏃 Zeitmesser mit Start/Pause/Stop-Funktionalität
+- 📊 Admin-Dashboard zur Verwaltung von Schülern und Laufzeiten
+- 📋 Schüler- und Klassenverwaltung
+- ⏱️ Zeitmessungen mit automatischem Speichern
+- 🔐 Sichere Admin-Authentifizierung
 
 ## Installation
 
 ### Voraussetzungen
-
 - Python 3.8+
-- pip
+- pip (Python Package Manager)
 
-### Schritte
+### Setup
 
-1. Repository klonen
-   ```bash
-   git clone <repository-url>
-   cd seelauf-app
-   ```
+1. **Repository klonen:**
+```bash
+cd f:\Informatik\Seelauf-App
+```
+ssss
+2. **Virtual Environment erstellen:**
+```bash
+python -m venv .venv
+```
 
-2. Virtuelle Umgebung erstellen (optional aber empfohlen)
-   ```bash
-   python -m venv venv
-   source venv/bin/activate  # Auf Windows: venv\Scripts\activate
-   ```
+3. **Virtual Environment aktivieren:**
+```bash
+# Windows
+.venv\Scripts\Activate.ps1
 
-3. Abhängigkeiten installieren
-   ```bash
-   pip install -r requirements.txt
-   ```
+# Linux/macOS
+source .venv/bin/activate
+```
 
-4. Umgebungskopie erstellen
-   ```bash
-   cp .env.example .env
-   ```
-   Passe die Werte in `.env` nach Bedarf an.
+4. **Dependencies installieren:**
+```bash
+pip install -r requirements.txt
+```
 
-5. Datenbank initialisieren (wird beim ersten Start automatisch erstellt)
+5. **Environment-Konfiguration:**
+```bash
+cp .env.example .env
+# .env anpassen (Admin-Code ändern, etc.)
+```
 
-6. Anwendung starten
-   ```bash
-   python app.py
-   ```
-   Die App läuft dann unter `http://localhost:8000`.
+6. **Anwendung starten:**
+```bash
+python app.py
+```
 
-## API Endpunkte
+Die App ist dann unter `http://localhost:8000` verfügbar.
 
-- `POST /api/stopwatch/start` - Stoppuhr starten
-- `POST /api/stopwatch/pause` - Stoppuhr pausieren
-- `POST /api/stopwatch/resume` - Stoppuhr fortsetzen
-- `POST /api/stopwatch/stop` - Stoppuhr stoppen und zurücksetzen
-- `POST /api/stopwatch/lap` - Runde hinzufügen
-- `POST /api/stopwatch/record` - Zeit mit Nummer aufnehmen
-  - Body: `{ "number": "123", "time": "00:05:32.10" }`
-- `GET /api/stopwatch/status` - Aktuellen Stoppuhrstatus abrufen
-
-## Projektstruktur
+## Struktur
 
 ```
-/ (root)
-├── app.py              # Hauptanwendung
-├── db.py               # Datenbankhilfen
-├── requirements.txt    # Python-Abhängigkeiten
-├── README.md           # Diese Datei
-├── .env.example        # Beispiel-Umgebungsvariablen
-├── Dockerfile          # Optional: Docker-Setup
-├── /routen             # Flask Blueprints
-│   ├── __init__.py
-│   ├── main.py         # Hauptrouten
-│   ├── stopwatch.py    # Stoppuhr-Logik und API
-│   └── zeitmesser.py   # Zeitmesser-Routen
-├── /static             # Statische Dateien (CSS, JS)
+seelauf-app/
+├── app.py              # Haupt-Anwendung
+├── db.py               # Datenbankmodul
+├── requirements.txt    # Python-Dependencies
+├── routen/             # Route-Module
+│   ├── main.py         # Haupt-Routes
+│   ├── admin.py        # Admin-Routes
+│   ├── zeitmesser.py   # Zeitmesser-Routes
+│   └── stopwatch.py    # Stopwatch-Klasse
+├── templates/          # HTML-Templates
+├── static/             # CSS, JS, Images
 │   ├── css/
-│   └── js/
-├── /templates          # HTML-Vorlagen
-├── /instance           # SQLite-Datenbank (wird erzeugt)
-└── /tests              # Unit-Tests (optional)
+│   ├── js/
+│   └── images/
+└── instance/           # Instanz-Verzeichnis (Datenbank)
 ```
 
-## Entwicklung
+## Verwendung
 
-- Führe `pytest` aus, um Tests zu laufen.
-- Für permanente Änderungen einen Pull Request erstellen.
+### Zeitmesser
+- Unter `/zeitmesser` verfügbar
+- Start/Pause/Stop-Buttons zum Steuern der Zeit
+- Nummern eingeben und Zeit aufzeichnen
+
+### Admin-Panel
+- Login unter `/admin/login`
+- Default Admin-Code: `admin123`
+- Schüler hinzufügen/bearbeiten/löschen
+- Laufzeiten verwalten
+- Zeitmessungen einsehen
+
+## Konfiguration
+
+Die Konfiguration erfolgt über die `.env` Datei:
+- `FLASK_DEBUG`: Debug-Modus aktivieren
+- `SECRET_KEY`: Session-Verschlüsselung
+- `ADMIN_CODE`: Admin-Zugangsscode
+- `DATABASE_PATH`: Pfad zur SQLite-Datenbank
+
+## Datenbankschema
+
+### students
+- id, name, class_group, nummer, ill
+
+### measurements
+- id, student_id, lauf_id, zeit, timestamp
+
+### laeufe
+- id, class_group, start_time, active
+
+## Development
+
+Zum Entwickeln:
+```bash
+# Virtual Environment aktivieren
+.venv\Scripts\Activate.ps1
+
+# Dependencies installieren
+pip install -r requirements.txt
+
+# App mit Debug-Modus starten
+set FLASK_DEBUG=1
+python app.py
+```
 
 ## Lizenz
 
-Dieses Projekt ist unter der MIT-Lizenz lizenziert - siehe die [LICENSE](LICENSE) Datei für Details.
+Projektintern
