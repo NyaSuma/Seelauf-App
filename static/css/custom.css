@@ -195,6 +195,22 @@ body::after {
     outline: 3px solid var(--sunrise-soft);
     outline-offset: 2px;
 }
+
+.btn-user_zeit
+{
+    background: linear-gradient(135deg, #34d399, #10b981);
+    border-color: #10b981;
+    color: white;
+    box-shadow: 0 8px 24px rgba(16, 185, 129, 0.45);
+    transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.3s ease;
+}
+.btn-user_zeit:hover {
+    background: linear-gradient(135deg, #6ee7b7, #34d399);
+    border-color: #34d399;
+    box-shadow: 0 12px 28px rgba(16, 185, 129, 0.55);
+    transform: translateY(-3px);
+}
+
 /* Overlay styling for login etc */
 .overlay {
     position: fixed;
