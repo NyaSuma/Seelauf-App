@@ -190,11 +190,41 @@ def delete_student(student_id):
         cursor = conn.cursor()
         cursor.execute("DELETE FROM students WHERE id = ?", (student_id,))
         conn.commit()
+# ============================================================================
+# LAUF-VERWALTUNG
+# ============================================================================
+
+def create_lauf(class_group, start_time=None, active=True):
+    """
+    Neuen Lauf für eine Klasse erstellen.
+    
+    Args:
+        class_group: Klasse/Gruppe
+        start_time: Startzeit (Standard: jetzt)
+        active: Ist der Lauf aktiv? (Standard: True)
+    
+    Returns:
+        ID des neu erstellten Laufs
+    """
+    if start_time is None:
+        start_time = datetime.now().isoformat()
+    
+    with get_db_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute(
+            "INSERT INTO laeufe (class_group, start_time, active) VALUES (?, ?, ?)",
+            (class_group, start_time, int(active))
+        )
+        conn.commit()
+        return cursor.lastrowid
+
+
+
+
 
 # ============================================================================
 # LAUF-VERANSTALTUNGEN (z.B. Sporttag pro Klasse)
 # ============================================================================
-
 def start_lauf(class_group):
     """
     Neuen Lauf für eine Klasse starten.
@@ -255,6 +285,26 @@ def end_lauf(lauf_id):
     with get_db_connection() as conn:
         cursor = conn.cursor()
         cursor.execute("UPDATE laeufe SET active = 0 WHERE id = ?", (lauf_id,))
+        conn.commit()
+
+def delete_lauf(lauf_id):
+    """Lauf löschen (inklusive aller zugehörigen Zeitmessungen)."""
+    with get_db_connection() as conn:
+        cursor = conn.cursor()
+        # Zuerst alle Zeitmessungen dieses Laufs löschen
+        cursor.execute("DELETE FROM measurements WHERE lauf_id = ?", (lauf_id,))
+        # Dann den Lauf selbst löschen
+        cursor.execute("DELETE FROM laeufe WHERE id = ?", (lauf_id,))
+        conn.commit()
+
+def restart_lauf(lauf_id):
+    """Lauf zurücksetzen (alle Zeitmessungen löschen, Lauf bleibt aktiv)."""
+    with get_db_connection() as conn:
+        cursor = conn.cursor()
+        # Alle Zeitmessungen dieses Laufs löschen
+        cursor.execute("DELETE FROM measurements WHERE lauf_id = ?", (lauf_id,))
+        # Lauf als aktiv markieren (falls er deaktiviert war)
+        cursor.execute("UPDATE laeufe SET active = 1 WHERE id = ?", (lauf_id,))
         conn.commit()
 
 # ============================================================================
