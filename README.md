@@ -100,13 +100,32 @@ Die Konfiguration erfolgt über die `.env` Datei:
 ## Datenbankschema
 
 ### students
-- id, name, class_group, nummer, ill
+- id, class_group, nummer, startnummer, ill
+- `startnummer` ist global eindeutig und wird automatisch vergeben.
+
+### classes
+- class_group, teacher
+- Klassen können im Admin-Bereich umbenannt und einer Lehrkraft zugeordnet werden.
+
+### run_groups
+- Laufgruppen fassen mehrere Klassen zusammen.
+- Im Zeitmesser kann eine Laufgruppe gestartet und ausgewählt werden.
+- Jede Laufgruppe besitzt eine eigene Stoppuhr und kann zeitversetzt zu anderen Gruppen laufen.
+- Die Teilnehmerübersicht zeigt laufende und bereits gemessene Personen.
+- Kranke Schüler werden automatisch nicht als Teilnehmer geführt.
+- Für die Zeitnahme genügt die globale Startnummer; eine Laufgruppe muss dafür nicht ausgewählt werden.
 
 ### measurements
 - id, student_id, lauf_id, zeit, timestamp
 
 ### laeufe
 - id, class_group, start_time, active
+
+### Excel-Import
+Im Admin-Bereich können `.xlsx`-Dateien importiert werden. Die Tabelle benötigt
+eine Klasse und die Anzahl der Schüler. Bei `10a | 36` werden automatisch die
+Nummern `1` bis `36` für die Klasse `10a` angelegt. Namen werden nicht gespeichert;
+eine Person wird ausschließlich durch Klasse und Nummer identifiziert.
 
 # Virtual Environment aktivieren
 .venv\Scripts\Activate.ps1

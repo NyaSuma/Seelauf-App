@@ -25,9 +25,17 @@
                     </div>
 
                     <div class="mb-3">
+                        <label for="runGroupSelect" class="form-label">Laufgruppe</label>
+                        <select class="form-select" id="runGroupSelect">
+                            <option value="">-- Laufgruppe auswählen --</option>
+                        </select>
+                        <div class="form-text" id="runGroupClasses">Keine Laufgruppe ausgewählt</div>
+                    </div>
+
+                    <div class="mb-3">
                         <label for="numberInput" class="form-label">Startnummer</label>
                         <div class="input-group">
-                            <input type="text" class="form-control" id="numberInput" placeholder="Nummer eingeben" aria-label="Nummer" disabled>
+                            <input type="text" class="form-control" id="numberInput" placeholder="Globale Startnummer eingeben" aria-label="Startnummer" disabled>
                             <button class="btn btn-lap" id="lapBtn" onclick="recordMeasurement()" disabled>Speichern</button>
                         </div>
                     </div>
@@ -50,9 +58,21 @@
         <div class="col-lg-5">
             <div class="card shadow-sm border-0">
                 <div class="card-body">
-                    <h5 class="laps-title">Aktive Läufe</h5>
+                    <h5 class="laps-title">Aktive Laufgruppen</h5>
                     <div id="activeRuns" class="laps-container">
                         <div class="empty-laps">Keine aktiven Läufe gefunden.</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card shadow-sm border-0 mt-4">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="laps-title mb-0">Teilnehmerstatus</h5>
+                        <span class="badge bg-warning text-dark" id="remainingCount">0</span>
+                    </div>
+                    <div id="participantsList" class="laps-container mt-2">
+                        <div class="empty-laps">Laufgruppe auswählen und starten.</div>
                     </div>
                 </div>
             </div>

@@ -196,6 +196,70 @@ body::after {
     outline-offset: 2px;
 }
 
+.admin-page-header {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 1.5rem;
+    padding: 1.5rem 1.75rem;
+    border: 1px solid rgba(238, 247, 246, 0.14);
+    border-radius: 18px;
+    background: rgba(10, 46, 58, 0.68);
+    box-shadow: 0 16px 36px rgba(0, 0, 0, 0.2);
+}
+.admin-page-header h1 {
+    margin: 0.15rem 0 0.4rem;
+    color: var(--foam);
+}
+.admin-page-header p {
+    margin: 0;
+    color: rgba(238, 247, 246, 0.72);
+}
+.eyebrow {
+    color: var(--sunrise-soft);
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+}
+.data-panel {
+    padding: 1.5rem;
+    border: 1px solid rgba(238, 247, 246, 0.14);
+    border-radius: 16px;
+    background: rgba(238, 247, 246, 0.96);
+    color: var(--lake-deep);
+    box-shadow: 0 16px 36px rgba(0, 0, 0, 0.18);
+}
+.data-panel h2,
+.data-panel .form-label,
+.data-panel .form-check-label,
+.data-panel .form-text,
+.data-panel legend {
+    color: var(--lake-deep);
+}
+.admin-table {
+    overflow: hidden;
+    border-radius: 12px;
+    background: rgba(238, 247, 246, 0.96);
+    color: var(--lake-deep);
+}
+.admin-table thead th {
+    background: var(--lake-deep);
+    color: var(--foam);
+    border-bottom: 0;
+}
+
+@media (max-width: 575px) {
+    .admin-page-header {
+        align-items: flex-start;
+        flex-direction: column;
+        padding: 1.25rem;
+    }
+    .admin-page-header .btn {
+        width: 100%;
+    }
+}
+
 .btn-user_zeit
 {
     background: linear-gradient(135deg, #34d399, #10b981);

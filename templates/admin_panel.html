@@ -26,9 +26,18 @@
         <div class="col">
             <div class="card h-100 shadow-sm">
                 <div class="card-body d-flex flex-column">
-                    <h5 class="card-title">Lauf Verwaltung</h5>
-                    <p class="card-text flex-grow-1">Starten, überwachen und beenden Sie Läufe für verschiedene Klassen/Gruppen.</p>
-                    <a href="{{ url_for('admin.list_laeufe') }}" class="btn btn-admin mt-auto">Läufe verwalten</a>
+                    <h5 class="card-title">Klassen und Lehrer</h5>
+                    <p class="card-text flex-grow-1">Klassen umbenennen und zuständige Lehrkräfte hinterlegen.</p>
+                    <a href="{{ url_for('admin.list_classes') }}" class="btn btn-admin mt-auto">Klassen verwalten</a>
+                </div>
+            </div>
+        </div>
+        <div class="col">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body d-flex flex-column">
+                    <h5 class="card-title">Laufgruppen</h5>
+                    <p class="card-text flex-grow-1">Mehrere Klassen zusammenfassen und für den Zeitnehmer vorbereiten.</p>
+                    <a href="{{ url_for('admin.list_run_groups') }}" class="btn btn-admin mt-auto">Laufgruppen verwalten</a>
                 </div>
             </div>
         </div>
@@ -58,10 +67,13 @@
         <h2>Schnellaktionen</h2>
         <div class="row g-3">
             <div class="col-md-3">
-                <a href="{{ url_for('admin.start_lauf') }}" class="btn btn-outline-admin w-100">+ Lauf starten</a>
+                <a href="{{ url_for('admin.list_run_groups') }}" class="btn btn-outline-admin w-100">Laufgruppe anlegen</a>
             </div>
             <div class="col-md-3">
                 <a href="{{ url_for('admin.add_student') }}" class="btn btn-outline-admin w-100">+ Schüler hinzufügen</a>
+            </div>
+            <div class="col-md-3">
+                <a href="{{ url_for('admin.import_students') }}" class="btn btn-outline-admin w-100">Excel importieren</a>
             </div>
             <div class="col-md-3">
                 <a href="{{ url_for('admin.clear_measurements') }}" class="btn btn-outline-danger w-100" onclick="return confirm('Wirklich alle Messungen löschen?')">Alle Messungen löschen</a>
