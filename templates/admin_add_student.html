@@ -5,17 +5,14 @@
     <h1 class="mb-4">Neuen Schüler hinzufügen</h1>
     <form method="POST">
         <div class="mb-3">
-            <label for="name" class="form-label">Name:</label>
-            <input type="text" class="form-control" id="name" name="name" required>
-        </div>
-        <div class="mb-3">
-            <label for="class_group" class="form-label">Klasse/Gruppe:</label>
+            <label for="class_group" class="form-label">Klasse:</label>
             <input type="text" class="form-control" id="class_group" name="class_group" required>
         </div>
         <div class="mb-3">
-            <label for="nummer" class="form-label">Nummer:</label>
+            <label for="nummer" class="form-label">Klassen-Nummer:</label>
             <input type="text" class="form-control" id="nummer" name="nummer" required>
         </div>
+        <p class="form-text">Die globale Startnummer wird automatisch vergeben.</p>
         <div class="mb-3 form-check">
             <input type="checkbox" class="form-check-input" name="ill" id="ill">
             <label class="form-check-label" for="ill">Schüler ist krank (nicht laufen)</label>

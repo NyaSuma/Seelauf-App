@@ -5,13 +5,7 @@
     <h1 class="mb-4">Läufeverwaltung</h1>
     <a href="{{ url_for('admin.start_lauf') }}" class="btn btn-admin mb-3">+ Lauf starten</a>
     <a href="{{ url_for('admin.erstelle_lauf') }}" class="btn btn-admin mb-3">+ Lauf erstellen</a>
-    {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-            {% for category, message in messages %}
-                <div class="alert alert-{{category}}">{{ message }}</div>
-            {% endfor %}
-        {% endif %}
-    {% endwith %}
+
     <div class="table-responsive">
         <table class="table table-striped table-hover">
             <thead class="table-dark">
@@ -42,7 +36,18 @@
                             <input type="hidden" name="lauf_id" value="{{ lauf.id }}">
                             <button type="submit" class="btn btn-sm btn-outline-danger">Beenden</button>
                         </form>
-                        {% endif %}
+                        {% else %}
+                        <form action="{{ url_for('admin.restart_lauf') }}" method="POST" class="d-inline">
+                            <input type="hidden" name="lauf_id" value="{{ lauf.id }}">
+                            <button type="submit" class="btn btn-sm btn-outline-primary">Neustarten</button>
+                        </form>
+                        <br>
+                        <br>
+                        <form action="{{ url_for('admin.delete_lauf') }}" method="POST" class="d-inline">
+                            <input type="hidden" name="lauf_id" value="{{ lauf.id }}">
+                            <button type="submit" class="btn btn-sm btn-outline-danger">Löschen</button>
+                        </form>
+                        {% endif %} 
                     </td>
                 </tr>
                 {% endfor %}

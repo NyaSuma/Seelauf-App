@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block title %}Klassen und Lehrer - Seelauf App{% endblock %}
+{% block content %}
+<div class="container py-4">
+    <h1 class="mb-4">Klassen und Lehrer</h1>
+    <p class="text-muted">Hier können Klassen umbenannt und die zuständigen Lehrkräfte hinterlegt werden.</p>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }}">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+    <div class="table-responsive">
+        <table class="table table-striped align-middle">
+            <thead class="table-dark">
+                <tr>
+                    <th>Klasse</th>
+                    <th>Lehrer</th>
+                    <th>Schüler</th>
+                    <th>Aktion</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in classes %}
+                <tr>
+                    {% set form_id = 'class-form-' ~ loop.index %}
+                        <td>
+                            <form id="{{ form_id }}" method="POST" action="{{ url_for('admin.list_classes') }}">
+                                <input type="hidden" name="old_class_group" value="{{ item.class_group }}">
+                                <input type="text" class="form-control" name="class_group" value="{{ item.class_group }}" required>
+                            </form>
+                        </td>
+                        <td><input form="{{ form_id }}" type="text" class="form-control" name="teacher" value="{{ item.teacher }}" placeholder="Name der Lehrkraft"></td>
+                        <td>{{ item.student_count }}</td>
+                        <td><button form="{{ form_id }}" type="submit" class="btn btn-sm btn-admin">Speichern</button></td>
+                </tr>
+                {% endfor %}
+                {% if not classes %}
+                <tr><td colspan="4" class="text-center">Noch keine Klassen vorhanden.</td></tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+    <a href="{{ url_for('admin.list_students') }}" class="btn btn-outline-secondary">Zur Schülerverwaltung</a>
+</div>
+{% endblock %}
