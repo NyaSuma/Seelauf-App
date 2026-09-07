@@ -2,11 +2,17 @@
 {% block title %}Admin Dashboard - Seelauf App{% endblock %}
 {% block content %}
 <div class="container py-4">
-    <h1 class="mb-4">Admin Dashboard</h1>
-    <p class="lead">Willkommen im Admin-Bereich der Seelauf-App.</p>
+    <div class="admin-page-header mb-4">
+        <div>
+            <span class="eyebrow">Verwaltung</span>
+            <h1>Admin Dashboard</h1>
+            <p>Klassen, Laufgruppen und Messungen an einem Ort steuern.</p>
+        </div>
+        <a href="{{ url_for('zeitmesser.zeitmesser') }}" class="btn btn-user">Zum Zeitnehmer</a>
+    </div>
     <div class="d-grid gap-3">
         <a href="{{ url_for('admin.list_students') }}" class="btn btn-admin btn-lg">Schüler verwalten</a>
-        <a href="{{ url_for('admin.list_laeufe') }}" class="btn btn-admin btn-lg">Läufe verwalten</a>
+        <a href="{{ url_for('admin.list_run_groups') }}" class="btn btn-admin btn-lg">Laufgruppen verwalten</a>
         <a href="{{ url_for('admin.list_measurements') }}" class="btn btn-admin btn-lg">Messungen ansehen</a>
         <a href="{{ url_for('admin.logout') }}" class="btn btn-outline-secondary btn-lg">Abmelden</a>
     </div>

@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}Klassen importieren - Seelauf App{% endblock %}
+{% block content %}
+<div class="container py-4">
+    <h1 class="mb-4">Klassen und Nummern importieren</h1>
+    <p class="text-muted">Die Excel-Tabelle muss eine Spalte für <strong>Klasse</strong> und eine Spalte für die <strong>Anzahl Schüler</strong> enthalten.</p>
+    <form method="POST" enctype="multipart/form-data" class="mb-4">
+        <div class="mb-3">
+            <label for="file" class="form-label">Excel-Datei (.xlsx)</label>
+            <input type="file" class="form-control" id="file" name="file" accept=".xlsx" required>
+        </div>
+        <button type="submit" class="btn btn-admin">Import starten</button>
+        <a href="{{ url_for('admin.list_students') }}" class="btn btn-outline-secondary">Abbrechen</a>
+    </form>
+
+    {% if skipped or errors %}
+    <h2 class="h5">Importprüfung</h2>
+    {% if skipped %}
+    <div class="alert alert-warning">{{ skipped|length }} bereits vorhandene Einträge wurden übersprungen.</div>
+    {% endif %}
+    {% if errors %}
+    <div class="alert alert-danger">
+        <strong>Fehlerhafte Zeilen:</strong>
+        <ul class="mb-0">
+            {% for error in errors %}<li>{{ error }}</li>{% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+    {% endif %}
+</div>
+{% endblock %}

@@ -23,3 +23,11 @@ def user_interface():
     (Entfernt zwischengeschaltete Menü-Seite)
     """
     return redirect(url_for('zeitmesser.zeitmesser'))
+
+
+@main_bp.route('/laeufer')
+def user_zeit():
+    """
+    Zeigt die Eigenzeit-Seite für Läufer an.
+    """
+    return render_template('user_zeit.html')

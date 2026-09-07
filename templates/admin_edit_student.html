@@ -5,16 +5,16 @@
     <h1 class="mb-4">Schüler bearbeiten</h1>
     <form method="POST">
         <div class="mb-3">
-            <label for="name" class="form-label">Name:</label>
-            <input type="text" class="form-control" id="name" name="name" value="{{ student.name }}" required>
-        </div>
-        <div class="mb-3">
-            <label for="class_group" class="form-label">Klasse/Gruppe:</label>
+            <label for="class_group" class="form-label">Klasse:</label>
             <input type="text" class="form-control" id="class_group" name="class_group" value="{{ student.class_group }}" required>
         </div>
         <div class="mb-3">
-            <label for="nummer" class="form-label">Nummer:</label>
+            <label for="nummer" class="form-label">Klassen-Nummer:</label>
             <input type="text" class="form-control" id="nummer" name="nummer" value="{{ student.nummer }}" required>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Globale Startnummer:</label>
+            <input type="text" class="form-control" value="{{ student.startnummer }}" readonly>
         </div>
         <div class="mb-3 form-check">
             <input type="checkbox" class="form-check-input" name="ill" id="ill" {% if student.ill %}checked{% endif %}>

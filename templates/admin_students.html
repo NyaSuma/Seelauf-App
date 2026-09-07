@@ -4,6 +4,8 @@
 <div class="container py-4">
     <h1 class="mb-4">Schülerverwaltung</h1>
     <a href="{{ url_for('admin.add_student') }}" class="btn btn-admin mb-3">+ Schüler hinzufügen</a>
+    <a href="{{ url_for('admin.import_students') }}" class="btn btn-outline-admin mb-3">Excel importieren</a>
+    <a href="{{ url_for('admin.list_classes') }}" class="btn btn-outline-admin mb-3">Klassen und Lehrer</a>
     {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
             {% for category, message in messages %}
@@ -11,13 +13,32 @@
             {% endfor %}
         {% endif %}
     {% endwith %}
+    <form method="GET" class="row g-2 align-items-end mb-4">
+        <div class="col-md-4">
+            <label for="class_group" class="form-label">Klasse filtern</label>
+            <select class="form-select" id="class_group" name="class_group">
+                <option value="">Alle Klassen</option>
+                {% for item in classes %}
+                <option value="{{ item.class_group }}" {% if selected_class == item.class_group %}selected{% endif %}>{{ item.class_group }}{% if item.teacher %} - {{ item.teacher }}{% endif %}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-md-4">
+            <label for="nummer" class="form-label">Nummer suchen</label>
+            <input type="search" class="form-control" id="nummer" name="nummer" value="{{ nummer_filter }}" placeholder="z. B. 12">
+        </div>
+        <div class="col-md-4 d-flex gap-2">
+            <button type="submit" class="btn btn-admin">Filtern</button>
+            <a href="{{ url_for('admin.list_students') }}" class="btn btn-outline-secondary">Zurücksetzen</a>
+        </div>
+    </form>
     <div class="table-responsive">
         <table class="table table-striped table-hover">
             <thead class="table-dark">
                 <tr>
-                    <th>Name</th>
-                    <th>Klasse/Gruppe</th>
-                    <th>Nummer</th>
+                    <th>Klasse</th>
+                    <th>Startnummer</th>
+                    <th>Klassen-Nr.</th>
                     <th>Krank</th>
                     <th>Aktion</th>
                 </tr>
@@ -25,8 +46,8 @@
             <tbody>
                 {% for student in students %}
                 <tr>
-                    <td>{{ student.name }}</td>
                     <td>{{ student.class_group }}</td>
+                    <td>{{ student.startnummer }}</td>
                     <td>{{ student.nummer }}</td>
                     <td>
                         {% if student.ill %}

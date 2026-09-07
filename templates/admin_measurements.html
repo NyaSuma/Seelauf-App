@@ -18,9 +18,9 @@
             <thead class="table-dark">
                 <tr>
                     <th>#</th>
-                    <th>Name</th>
-                    <th>Klasse/Gruppe</th>
-                    <th>Nummer</th>
+                    <th>Klasse</th>
+                    <th>Startnummer</th>
+                    <th>Klassen-Nr.</th>
                     <th>Zeit</th>
                     <th>Lauf</th>
                     <th>Timestamp</th>
@@ -30,8 +30,8 @@
                 {% for m in measurements %}
                 <tr>
                     <td>{{ m.id }}</td>
-                    <td>{{ m.name }}</td>
                     <td>{{ m.class_group }}</td>
+                    <td>{{ m.startnummer }}</td>
                     <td>{{ m.nummer }}</td>
                     <td>{{ m.zeit }}</td>
                     <td>

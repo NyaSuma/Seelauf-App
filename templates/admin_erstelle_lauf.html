@@ -1,0 +1,27 @@
+{%- extends "base.html" -%}
+{%- block title -%}Lauf erstellen - Seelauf App{%- endblock -%}
+{%- block content -%}
+<div class="container py-4">
+    <h1 class="mb-4">Lauf erstellen</h1>
+    <p class="text-muted">Erstellen Sie einen neuen Lauf für eine bestimmte Klasse oder Gruppe.</p>
+
+    <form method="POST" action="{{ url_for('admin.erstelle_lauf') }}">
+        <div class="mb-3">
+            <label for="name" class="form-label">Name</label>
+            <input type="text" class="form-control" id="name" name="name" required>
+        </div>
+        <div class="mb-3">
+            <label for="date" class="form-label">Startzeit</label>
+            <input type="datetime-local" class="form-control" id="date" name="date" required>
+        </div>
+        <div class="mb-3">
+            <label for="active" class="form-label">Aktiv</label>
+            <select class="form-select" id="active" name="active" required>
+                <option value="1">Ja</option>
+                <option value="0">Nein</option>
+            </select>
+        </div>
+        <button type="submit" class="btn btn-primary">Lauf erstellen</button>
+    </form>
+</div>
+{%- endblock -%}
